@@ -2,8 +2,8 @@ package middleware
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"github.com/wuyan94zl/api/auth"
-	"github.com/wuyan94zl/api/utils"
+	"github.com/wuyan94zl/api/pkg/auth"
+	"github.com/wuyan94zl/api/pkg/utils"
 )
 func ApiAuth() gin.HandlerFunc  {
 	return func(c *gin.Context) {

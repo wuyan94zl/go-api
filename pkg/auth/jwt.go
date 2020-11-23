@@ -2,8 +2,8 @@ package auth
 import (
 	"fmt"
 	jwt "github.com/dgrijalva/jwt-go"
-	"github.com/wuyan94zl/api/database"
-	"github.com/wuyan94zl/api/models"
+	"github.com/wuyan94zl/api/app/models/user"
+	"github.com/wuyan94zl/api/pkg/database"
 	"time"
 )
 // 定义授权保存信息
@@ -17,7 +17,7 @@ const (
 	SECRETKEY = "wuyan-secretkey"
 )
 // 获取用户token值
-func GetToken(data *models.User) (map[string]interface{},error) {
+func GetToken(data *user.User) (map[string]interface{},error) {
 	// 7200秒过期
 	maxAge := 7200
 	expTime := time.Now().Add(time.Duration(maxAge)*time.Second).Unix()
@@ -50,7 +50,7 @@ func GetUser(tokenString string) (interface{}, error) {
 	})
 	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
 		id := int(claims["Id"].(float64))
-		user := models.User{}
+		user := user.User{}
 		database.DB.First(&user,id)
 		return user,nil
 	} else {

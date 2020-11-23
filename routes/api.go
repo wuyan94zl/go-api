@@ -1,8 +1,8 @@
 package routes
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/wuyan94zl/api/controllers"
-	"github.com/wuyan94zl/api/middleware"
+	"github.com/wuyan94zl/api/app/controllers"
+	"github.com/wuyan94zl/api/app/middleware"
 )
 // 注册路由列表
 func ApiRouter(router *gin.Engine)  {

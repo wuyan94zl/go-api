@@ -1,9 +1,13 @@
-package models
+package user
 
-import database "github.com/wuyan94zl/api/database"
+import (
+	"github.com/wuyan94zl/api/app/models"
+	"github.com/wuyan94zl/api/pkg/database"
+)
 
 // 定义 表名 users 字段如下
 type User struct {
+	models.BaseModel
 	Id	        int
 	Email       string
 	Password	string
