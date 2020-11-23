@@ -23,6 +23,7 @@ func init() {
 	)
 	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=%s&parseTime=%t&loc=%s",
 		username, password, host, port, database, charset, true, "Local")
+	fmt.Println(dsn)
 	DB, errDb = gorm.Open("mysql", dsn)
 	if errDb != nil {
 		panic(errDb)

@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/wuyan94zl/api/pkg/auth"
 	"github.com/wuyan94zl/api/pkg/utils"
+	"strings"
 )
 func ApiAuth() gin.HandlerFunc  {
 	return func(c *gin.Context) {
@@ -13,15 +14,21 @@ func ApiAuth() gin.HandlerFunc  {
 			c.Abort()
 			return
 		}
-		info, err := auth.GetUser(tokenString)
+		kv := strings.Split(tokenString, " ")
+		if kv[0] != "Bearer"{
+			utils.SuccessErr(c,401,"Token 错误")
+			c.Abort()
+			return
+		}
+		info, err := auth.GetUser(kv[1])
 		if err != nil {
 			fmt.Println(err)
-			utils.SuccessErr(c,401,"登录错误")
+			utils.SuccessErr(c,401,"登录已失效")
 			c.Abort()
 			return
 		}else {
 			// 保存用户到 上下文
-			c.Set("Authuser",info)
+			c.Set("user",info)
 			c.Next()
 		}
 	}

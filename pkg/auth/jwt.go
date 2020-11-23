@@ -8,7 +8,7 @@ import (
 )
 // 定义授权保存信息
 type CustomClaims struct {
-	Id	int
+	Id	uint64
 	ExpTime int64
 	jwt.StandardClaims
 }
