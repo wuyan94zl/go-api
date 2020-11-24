@@ -2,9 +2,9 @@ package main
 
 import (
 	"fmt"
+	"github.com/wuyan94zl/api/bootstrap"
 	"github.com/wuyan94zl/api/config"
 	conf "github.com/wuyan94zl/api/pkg/config"
-	"github.com/wuyan94zl/api/routes"
 )
 
 func init() {
@@ -12,7 +12,7 @@ func init() {
 	config.Initialize()
 }
 func main() {
-	app := routes.Register()
+	app := bootstrap.Start()
 	addr := fmt.Sprintf(":%s", conf.GetString("app.port"))
 	app.Run(addr)
 }
