@@ -12,7 +12,7 @@ func init() {
 	config.Initialize()
 }
 func main() {
-	router := routes.Register()
+	app := routes.Register()
 	addr := fmt.Sprintf(":%s", conf.GetString("app.port"))
-	router.Run(addr)
+	app.Run(addr)
 }
