@@ -107,14 +107,15 @@ func UserOne(c *gin.Context) {
 func UserList(c *gin.Context) {
 	params := make([]model.Condition, 2)
 	i := 0
-	id := c.Query("id")
-	if id != "" {
-		params[i] = model.Condition{Key: "id", Way: "=", Value: id}
+	email := c.PostForm("email")
+	if email != "" {
+		params[i] = model.Condition{Key: "email", Way: "like", Value: fmt.Sprintf("%s%s", email, "%")}
 		i++
 	}
-	name := c.Query("name")
+	name := c.PostForm("name")
 	if name != "" {
 		params[i] = model.Condition{Key: "name", Way: "like", Value: fmt.Sprintf("%s%s", name, "%")}
+		i++
 	}
 	condition := model.GetCondition(params, i)
 	lists := model.GetAll(&[]user.User{}, condition)
@@ -125,16 +126,18 @@ func UserList(c *gin.Context) {
 func UserPaginate(c *gin.Context) {
 	params := make([]model.Condition, 2)
 	i := 0
-	id := c.Query("id")
-	if id != "" {
-		params[i] = model.Condition{Key: "id", Way: "=", Value: id}
+	email := c.PostForm("email")
+	if email != "" {
+		params[i] = model.Condition{Key: "email", Way: "like", Value: fmt.Sprintf("%s%s", email, "%")}
 		i++
 	}
-	name := c.Query("name")
+	name := c.PostForm("name")
 	if name != "" {
 		params[i] = model.Condition{Key: "name", Way: "like", Value: fmt.Sprintf("%s%s", name, "%")}
+		i++
 	}
 	condition := model.GetCondition(params, i)
+
 	var u []user.User
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 	pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "10"))
