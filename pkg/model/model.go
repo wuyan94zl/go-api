@@ -4,9 +4,8 @@ import (
 	"github.com/wuyan94zl/api/pkg/database"
 )
 
-/**
-获取一条数据
- */
+
+//获取一条数据
 func GetFirst(model interface{},id interface{}) (interface{},error){
 	if err := database.DB.First(model,id).Error; err != nil {
 		return model, err
@@ -38,26 +37,30 @@ func GetAll(model interface{},condition []Condition,limit ...int) interface{}{
 }
 
 /**
-删除数据
+根据条件删除数据
  */
 func Delete(model interface{},condition []Condition) bool{
 	rom := orm(condition)
 	rom.Delete(model)
 	return true
 }
-
+/**
+// 删除当前模型数据
+ */
 func DeleteOne(model interface{}) bool{
 	database.DB.Delete(model)
 	return true
 }
-
+/**
+更新当前模型数据
+ */
 func UpdateOne(model interface{}) interface{}{
 	database.DB.Save(model)
 	return model
 }
 
 /**
-* 单表分页查询
+单表分页查询
  */
 func Paginate(model interface{}, pageInfo PageInfo, condition []Condition) PageList {
 	offset := (pageInfo.Page - 1) * pageInfo.PageSize

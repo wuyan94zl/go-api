@@ -17,8 +17,8 @@ func UserLogin(c *gin.Context) {
 	// 查询获取到用户
 	email := c.PostForm("email")
 	password := c.PostForm("password")
-	condition := make([]model.Condition, 1)
-	condition[0] = model.Condition{Key: "email", Way: "=", Value: email}
+	var condition []model.Condition
+	condition = model.SetCondition(condition,"email",email)
 	u := model.GetOne(&user.User{}, condition)
 	info := u.(*user.User)
 	if info.Id == 0 {
@@ -105,42 +105,34 @@ func UserOne(c *gin.Context) {
 
 // 获取多个用户信息
 func UserList(c *gin.Context) {
-	params := make([]model.Condition, 2)
-	i := 0
+	var conditions []model.Condition
 	email := c.PostForm("email")
-	if email != "" {
-		params[i] = model.Condition{Key: "email", Way: "like", Value: fmt.Sprintf("%s%s", email, "%")}
-		i++
+	if email != ""{
+		conditions = model.SetCondition(conditions,"email",fmt.Sprintf("%s%s", email, "%"),"like")
 	}
 	name := c.PostForm("name")
-	if name != "" {
-		params[i] = model.Condition{Key: "name", Way: "like", Value: fmt.Sprintf("%s%s", name, "%")}
-		i++
+	if name != ""{
+		conditions = model.SetCondition(conditions,"name",name)
 	}
-	condition := model.GetCondition(params, i)
-	lists := model.GetAll(&[]user.User{}, condition)
+	lists := model.GetAll(&[]user.User{}, conditions)
 	utils.SuccessData(c, lists)
 }
 
 // 获取分页用户信息
 func UserPaginate(c *gin.Context) {
-	params := make([]model.Condition, 2)
-	i := 0
+	var conditions []model.Condition
 	email := c.PostForm("email")
-	if email != "" {
-		params[i] = model.Condition{Key: "email", Way: "like", Value: fmt.Sprintf("%s%s", email, "%")}
-		i++
+	if email != ""{
+		conditions = model.SetCondition(conditions,"email",fmt.Sprintf("%s%s", email, "%"),"like")
 	}
 	name := c.PostForm("name")
-	if name != "" {
-		params[i] = model.Condition{Key: "name", Way: "like", Value: fmt.Sprintf("%s%s", name, "%")}
-		i++
+	if name != ""{
+		conditions = model.SetCondition(conditions,"name",name)
 	}
-	condition := model.GetCondition(params, i)
 
 	var u []user.User
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 	pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "10"))
-	list := model.Paginate(&u, model.PageInfo{Page: page, PageSize: pageSize}, condition)
+	list := model.Paginate(&u, model.PageInfo{Page: page, PageSize: pageSize}, conditions)
 	utils.SuccessData(c, list) // 返回查询列表
 }

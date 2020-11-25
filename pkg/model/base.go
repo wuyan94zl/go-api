@@ -25,19 +25,22 @@ type PageList struct {
 // 查询条件
 type Condition struct {
 	Key   string
-	Way   string
 	Value string
+	Way   string
 }
 
 /**
 设置condition 查询条件数据
 */
-func GetCondition(params []Condition, n int) []Condition {
-	condition := make([]Condition, n)
-	for i := 0; i < n; i++ {
-		condition[i] = params[i]
+func SetCondition(params []Condition,key string,val string,where ...string) []Condition {
+	condition := Condition{Key: key,Value: val}
+	if where != nil{
+		condition.Way = where[0]
+	}else{
+		condition.Way = "="
 	}
-	return condition
+	params = append(params, condition)
+	return params
 }
 
 func orm(condition []Condition) *gorm.DB {
