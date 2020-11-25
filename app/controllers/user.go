@@ -14,6 +14,15 @@ import (
 
 // 登录
 func UserLogin(c *gin.Context) {
+	// 验证参数
+	data := make(map[string][]string)
+	data["email"] = []string{"required","min:6","email"}
+	data["password"] = []string{"required","between:6,20"}
+	validate := utils.Validator(c.Request, data)
+	if validate != nil{
+		utils.SuccessErr(c,403,validate)
+		return
+	}
 	// 查询获取到用户
 	email := c.PostForm("email")
 	password := c.PostForm("password")
@@ -46,6 +55,16 @@ func UserInfo(c *gin.Context) {
 
 // 创建用户
 func UserCreate(c *gin.Context) {
+	// 验证参数
+	data := make(map[string][]string)
+	data["email"] = []string{"required","min:6","email"}
+	data["password"] = []string{"required","between:6,20"}
+	data["name"] = []string{"required","between:6,20"}
+	validate := utils.Validator(c.Request, data)
+	if validate != nil{
+		utils.SuccessErr(c,403,validate)
+		return
+	}
 	email := c.PostForm("email")
 	password := c.PostForm("password")
 	name := c.PostForm("name")
@@ -71,6 +90,16 @@ func UserDelete(c *gin.Context) {
 
 // 更新用户
 func UserUpdate(c *gin.Context) {
+	// 验证参数
+	data := make(map[string][]string)
+	data["email"] = []string{"required","min:6","email"}
+	data["password"] = []string{"between:6,20"}
+	data["name"] = []string{"required","between:6,20"}
+	validate := utils.Validator(c.Request, data)
+	if validate != nil{
+		utils.SuccessErr(c,403,validate)
+		return
+	}
 	id, _ := strconv.Atoi(c.Query("id"))
 	u, _ := model.GetFirst(&user.User{}, id)
 	info := u.(*user.User)
