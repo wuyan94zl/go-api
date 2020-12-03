@@ -2,7 +2,7 @@ package auth
 import (
 	"fmt"
 	jwt "github.com/dgrijalva/jwt-go"
-	"github.com/wuyan94zl/api/app/models/user"
+	"github.com/wuyan94zl/api/app/models/admin"
 	"github.com/wuyan94zl/api/pkg/database"
 	"time"
 )
@@ -14,10 +14,10 @@ type CustomClaims struct {
 }
 // 私钥
 const (
-	SECRETKEY = "wuyan-secretkey"
+	SECRETARY = "wuyan-secret-key"
 )
 // 获取用户token值
-func GetToken(data *user.User) (map[string]interface{},error) {
+func GetToken(data *admin.Admin) (map[string]interface{},error) {
 	// 7200秒过期
 	maxAge := 7200
 	expTime := time.Now().Add(time.Duration(maxAge)*time.Second).Unix()
@@ -30,7 +30,7 @@ func GetToken(data *user.User) (map[string]interface{},error) {
 		},
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, customClaims)
-	tokenString, err := token.SignedString([]byte(SECRETKEY))
+	tokenString, err := token.SignedString([]byte(SECRETARY))
 	if err != nil {
 		return nil,err
 	}
@@ -46,13 +46,13 @@ func GetUser(tokenString string) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
 		}
-		return []byte(SECRETKEY), nil
+		return []byte(SECRETARY), nil
 	})
 	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
 		id := int(claims["Id"].(float64))
-		user := user.User{}
-		database.DB.First(&user,id)
-		return user,nil
+		admin := admin.Admin{}
+		database.DB.First(&admin,id)
+		return admin,nil
 	} else {
 		return nil, err
 	}

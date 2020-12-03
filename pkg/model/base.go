@@ -2,23 +2,23 @@ package model
 
 import (
 	"fmt"
-	"github.com/jinzhu/gorm"
 	"github.com/wuyan94zl/api/pkg/database"
+	"gorm.io/gorm"
 )
 
 // 分页数据
 type PageInfo struct {
-	Page     int
-	PageSize int
+	Page     int64
+	PageSize int64
 }
 
 // 分页返回数
 type PageList struct {
-	CurrentPage int
-	FirstPage   int
-	LastPage    int
-	PageSize    int
-	Total       int
+	CurrentPage int64
+	FirstPage   int64
+	LastPage    int64
+	PageSize    int64
+	Total       int64
 	Data        interface{}
 }
 

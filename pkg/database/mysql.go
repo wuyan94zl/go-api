@@ -2,9 +2,12 @@ package database
 
 import (
 	"fmt"
-	"github.com/jinzhu/gorm"
-	_ "github.com/jinzhu/gorm/dialects/mysql"
 	"github.com/wuyan94zl/api/pkg/config"
+	"gorm.io/driver/mysql"
+	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
+	"log"
+	"os"
 	"strconv"
 	"time"
 )
@@ -28,13 +31,25 @@ func SetMysqlDB() {
 	)
 	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=%s&parseTime=%t&loc=%s",
 		username, password, host, port, database, charset, true, "Local")
-	DB, errDb = gorm.Open("mysql", dsn)
-	sqlDB := DB.DB()
+	newLogger := logger.New(
+		log.New(os.Stdout, "\r\n", log.LstdFlags), // io writer
+		logger.Config{
+			SlowThreshold: 500 * time.Millisecond, // 慢 SQL 阈值 500ms （如打印所有sql设置1ms）
+			LogLevel:      logger.Warn,            // Log level
+			Colorful:      false,                  // 禁用彩色打印
+		},
+	)
+	DB, errDb = gorm.Open(mysql.Open(dsn), &gorm.Config{
+		Logger: newLogger,
+	})
+
+	sqlDB, _ := DB.DB()
 	sqlDB.SetMaxOpenConns(maxConnect)     // 设置最大连接数
 	sqlDB.SetMaxIdleConns(maxIdleConnect) //
 	sqlDB.SetConnMaxLifetime(time.Duration(maxLifeSeconds))
 	if errDb != nil {
 		panic(errDb)
 	}
-	DB.LogMode(true) // 开启打印sql 日志
+	//DB.Logger(true)
+	//DB.LogMode(true) // 开启打印sql 日志
 }

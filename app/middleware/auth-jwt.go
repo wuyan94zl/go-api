@@ -28,7 +28,7 @@ func ApiAuth() gin.HandlerFunc  {
 			return
 		}else {
 			// 保存用户到 上下文
-			c.Set("user",info)
+			c.Set("admin",info)
 			c.Next()
 		}
 	}
