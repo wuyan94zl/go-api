@@ -7,7 +7,7 @@ import (
 )
 
 // 创建删除方法
-func setDelete(file *os.File, kind reflect.Type) string {
+func getDeleteFuncStr(file *os.File, kind reflect.Type) string {
 	name := kind.Name()
 	str := `
 func Delete(c *gin.Context) {

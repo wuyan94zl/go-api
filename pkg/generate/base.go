@@ -40,8 +40,7 @@ func setFile(file string) {
 	if err != nil {
 		if os.IsNotExist(err) {
 			fmt.Println("创建文件", file)
-			_, e := os.Create(file)
-			fmt.Println("创建文件", e)
+			_, _ = os.Create(file)
 		}
 	}
 }

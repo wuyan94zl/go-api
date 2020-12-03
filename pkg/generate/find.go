@@ -31,7 +31,7 @@ func setSearch(data []map[string]mapValue) string {
 }
 
 // 创建分类列表查询方法
-func setPaginate(file *os.File, kind reflect.Type) string{
+func getPaginateFuncStr(file *os.File, kind reflect.Type) string{
 	str := `
 func Paginate(c *gin.Context) {
 	var conditions []model.Condition
@@ -55,7 +55,7 @@ func Paginate(c *gin.Context) {
 }
 
 // 创建详细数据方法
-func setOne(file *os.File, kind reflect.Type) string{
+func getInfoFuncStr(file *os.File, kind reflect.Type) string{
 	str := `
 func Info(c *gin.Context) {
 `

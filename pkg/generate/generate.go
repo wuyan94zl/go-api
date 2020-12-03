@@ -9,7 +9,7 @@ import (
 )
 
 // 设置curd控制器
-func StructCurd(kind interface{}) {
+func SetCurd(kind interface{}) {
 	kindType := reflect.TypeOf(kind)
 
 	// 打开文件操作流
@@ -21,33 +21,30 @@ func StructCurd(kind interface{}) {
 	}
 	defer file.Close()
 	os.Truncate(dir,0)
+
 	// package
-	pkg := fmt.Sprintf("package %s%s", name, "\n")
-
+	pkgStr := fmt.Sprintf("package %s%s", name, "\n")
 	// import
-	imp := `import (
-	"fmt"
-	"github.com/gin-gonic/gin"
-	"github.com/wuyan94zl/api/app/models/%s"
-	"github.com/wuyan94zl/api/pkg/model"
-	"github.com/wuyan94zl/api/pkg/utils"
-	"strconv"
-)
-`
-	imp = fmt.Sprintf(imp,name)
-
-	create := setCreate(file, kindType)
-
-	n := strings.Index(create,"bcrypt.GenerateFromPassword")
+	impStr := getImportStr(name)
+	// create
+	createStr := getCreateFuncStr(file, kindType)
+	// 有密码字段 import 增加 bcrypt包
+	n := strings.Index(createStr,"bcrypt.GenerateFromPassword")
 	if n != -1{
-		imp = strings.Replace(imp,")","	\"golang.org/x/crypto/bcrypt\"\n)",1)
+		impStr = strings.Replace(impStr,")","	\"golang.org/x/crypto/bcrypt\"\n)",1)
 	}
-	update := setUpdate(file, kindType)
-	delete := setDelete(file, kindType)
-	info := setOne(file,kindType)
-	paginate := setPaginate(file, kindType)
+	// update func
+	updateStr := getUpdateFuncStr(file, kindType)
+	// delete func
+	deleteStr := getDeleteFuncStr(file, kindType)
+	// info func
+	infoStr := getInfoFuncStr(file,kindType)
+	// Paginate func
+	paginateStr := getPaginateFuncStr(file, kindType)
 
-	rightStr := fmt.Sprintf("%s%s%s%s%s%s%s",pkg,imp,create,update,delete,info,paginate)
+	// 合并
+	rightStr := fmt.Sprintf("%s%s%s%s%s%s%s",pkgStr,impStr,createStr,updateStr,deleteStr,infoStr,paginateStr)
+	// 写入
 	_, err = file.Write([]byte(rightStr))
 	if err != nil {
 		fmt.Println(err)
@@ -56,7 +53,7 @@ func StructCurd(kind interface{}) {
 }
 
 // 设置路由
-func StructRoute(kind interface{})  {
+func SetRoute(kind interface{})  {
 	name := strings.ToLower(reflect.TypeOf(kind).Name())
 	dir, _ := os.Getwd()
 	filePath := fmt.Sprintf("%s%s",dir,"\\routes\\api.go")

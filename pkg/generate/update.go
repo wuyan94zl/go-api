@@ -21,7 +21,7 @@ func setInfo(KindType reflect.Type) string {
 }
 
 // 创建Update方法
-func setUpdate(file *os.File, kind reflect.Type) string{
+func getUpdateFuncStr(file *os.File, kind reflect.Type) string{
 	str := `
 func Update(c *gin.Context) {
 	// 验证参数
@@ -43,6 +43,14 @@ func Update(c *gin.Context) {
 	// 查询信息
 	data = getInfo(kind)
 	str = fmt.Sprintf("%s\n\t%s", str, data)
+	// 数据不存在
+	data = `	if %sInfo.Id == 0 {
+		utils.SuccessErr(c, -1000, "数据不存在")
+		return
+	}`
+	data = fmt.Sprintf(data, kind.Name())
+	str = fmt.Sprintf("%s%s\n", str, data)
+
 	// 设置更改信息
 	data = setInfo(kind)
 	str = fmt.Sprintf("%s\n%s", str, data)

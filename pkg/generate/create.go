@@ -7,7 +7,7 @@ import (
 )
 
 // 创建Create方法
-func setCreate(file *os.File, kind reflect.Type) string{
+func getCreateFuncStr(file *os.File, kind reflect.Type) string{
 	str := `
 func Create(c *gin.Context) {
 	// 验证参数
