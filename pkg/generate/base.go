@@ -11,6 +11,7 @@ type mapValue struct {
 	validateInfo     string
 	searchInfo       string
 	relationshipInfo string
+	typeInfo         string
 }
 
 // 获取文件位置
@@ -50,7 +51,16 @@ func getField(rlt []map[string]mapValue, KindType reflect.Type) []map[string]map
 	for i := 0; i < KindType.NumField(); i++ {
 		if !KindType.Field(i).Anonymous {
 			item := make(map[string]mapValue)
-			item[KindType.Field(i).Name] = mapValue{validateInfo: KindType.Field(i).Tag.Get("validate"), searchInfo: KindType.Field(i).Tag.Get("search"), relationshipInfo: KindType.Field(i).Tag.Get("relationship")}
+			var v mapValue
+			v.searchInfo = KindType.Field(i).Tag.Get("search")
+			v.validateInfo = KindType.Field(i).Tag.Get("validate")
+			v.relationshipInfo = KindType.Field(i).Tag.Get("relationship")
+			if KindType.Field(i).Tag.Get("pwd") != "" {
+				v.typeInfo = "pwd"
+			} else {
+				v.typeInfo = KindType.Field(i).Type.Name()
+			}
+			item[KindType.Field(i).Name] = v
 			rlt = append(rlt, item)
 		}
 	}
@@ -68,7 +78,7 @@ func setValidate(data []map[string]mapValue) string {
 				for _, i := range info {
 					vail = fmt.Sprintf("%s,\"%s\"", vail, i)
 				}
-				str = fmt.Sprintf("%s\tdata[\"%s\"] = []string{%s} \n", str, k, vail[1:])
+				str = fmt.Sprintf("%s\tdata[\"%s\"] = []string{%s} \n", str, setToLower(k), vail[1:])
 			}
 		}
 	}
@@ -76,20 +86,25 @@ func setValidate(data []map[string]mapValue) string {
 }
 
 // 获取Model创建数据
-func getModelData(KindType reflect.Type) string {
+func getModelData(KindType reflect.Type, data []map[string]mapValue) string {
 	name := KindType.Name()
-	str := fmt.Sprintf("\t%s := %s{", name, KindType)
+	//str := fmt.Sprintf("%s := %s{", name, KindType)
+	str := ""
 	pwd := ""
 	param := ""
-	for i := 0; i < KindType.NumField(); i++ {
-		if !KindType.Field(i).Anonymous {
-			if KindType.Field(i).Tag.Get("validate") != "" {
-				if KindType.Field(i).Tag.Get("pwd") != "" {
-					pwd = `pwd, _ := bcrypt.GenerateFromPassword([]byte(c.PostForm("%s")), bcrypt.DefaultCost)`
-					pwd = fmt.Sprintf(pwd, KindType.Field(i).Name)
-					param = fmt.Sprintf("%s,%s: string(%s)", param, KindType.Field(i).Name, "pwd")
+	for _, mapVal := range data {
+		for k, v := range mapVal {
+			lowerK := setToLower(k)
+			if v.typeInfo == "pwd" {
+				pwd = `pwd, _ := bcrypt.GenerateFromPassword([]byte(c.PostForm("%s")), bcrypt.DefaultCost)`
+				pwd = fmt.Sprintf(pwd, lowerK)
+				param = fmt.Sprintf("%s\t%s.%s = string(%s)\n", param, name, k, "pwd")
+			} else {
+				if v.typeInfo != "string" {
+					infoVal := setType(v.typeInfo, k, lowerK, name)
+					param = fmt.Sprintf("%s%s\n", param, infoVal)
 				} else {
-					param = fmt.Sprintf("%s,%s: c.PostForm(\"%s\")", param, KindType.Field(i).Name, KindType.Field(i).Name)
+					param = fmt.Sprintf("%s\t%s.%s = c.PostForm(\"%s\")\n", param, name, k, lowerK)
 				}
 			}
 		}
@@ -97,16 +112,70 @@ func getModelData(KindType reflect.Type) string {
 	if pwd != "" {
 		str = fmt.Sprintf("%s\n%s", pwd, str)
 	}
-	str = fmt.Sprintf("%s%s}", str, param[1:])
+	str = fmt.Sprintf("%s%s", str, param)
 	return str
+}
+
+func setType(typeName string, keyName string, lowerKey string, name string) string {
+	switch typeName {
+	case "uint64":
+		str := fmt.Sprintf("\t%s,_ := strconv.Atoi(c.PostForm(\"%s\"))\n", keyName, lowerKey)
+		str = fmt.Sprintf("%s\t%s.%s = uint64(%s)", str, name, keyName, keyName)
+		return str
+	case "uint32":
+		str := fmt.Sprintf("\t%s,_ := strconv.Atoi(c.PostForm(\"%s\"))\n", keyName, lowerKey)
+		str = fmt.Sprintf("%s\t%s.%s = uint32(%s)", str, name, keyName, keyName)
+		return str
+	case "uint16":
+		str := fmt.Sprintf("\t%s,_ := strconv.Atoi(c.PostForm(\"%s\"))\n", keyName, lowerKey)
+		str = fmt.Sprintf("%s\t%s.%s = uint16(%s)", str, name, keyName, keyName)
+		return str
+	case "uint8":
+		str := fmt.Sprintf("\t%s,_ := strconv.Atoi(c.PostForm(\"%s\"))\n", keyName, lowerKey)
+		str = fmt.Sprintf("%s\t%s.%s = uint8(%s)", str, name, keyName, keyName)
+		return str
+	case "int64":
+		str := fmt.Sprintf("\t%s,_ := strconv.Atoi(c.PostForm(\"%s\"))\n", keyName, lowerKey)
+		str = fmt.Sprintf("%s\t%s.%s = int64(%s)", str, name, keyName, keyName)
+		return str
+	case "int32":
+		str := fmt.Sprintf("\t%s,_ := strconv.Atoi(c.PostForm(\"%s\"))\n", keyName, lowerKey)
+		str = fmt.Sprintf("%s\t%s.%s = int32(%s)", str, name, keyName, keyName)
+		return str
+	case "int16":
+		str := fmt.Sprintf("\t%s,_ := strconv.Atoi(c.PostForm(\"%s\"))\n", keyName, lowerKey)
+		str = fmt.Sprintf("%s\t%s.%s = int16(%s)", str, name, keyName, keyName)
+		return str
+	case "int8":
+		str := fmt.Sprintf("\t%s,_ := strconv.Atoi(c.PostForm(\"%s\"))\n", keyName, lowerKey)
+		str = fmt.Sprintf("%s\t%s.%s = int8(%s)", str, name, keyName, keyName)
+		return str
+	case "Time":
+		str := fmt.Sprintf("\t%s := utils.SetStrToTime(c.PostForm(\"%s\"))\n", keyName, lowerKey)
+		str = fmt.Sprintf("%s\t%s.%s = %s", str, name, keyName, keyName)
+		return str
+	}
+	return ""
+}
+
+func setToLower(k string) string {
+	str := "QWERTYUIOPASDFGHJKLZXCVBNM"
+	for _, v := range str {
+		if strings.Index(k, string(v)) == 0 {
+			k = strings.Replace(k, string(v), strings.ToLower(string(v)), -1)
+		} else if strings.Index(k, string(v)) > 0 {
+			k = strings.Replace(k, string(v), fmt.Sprintf("_%s", strings.ToLower(string(v))), -1)
+		}
+	}
+	return k
 }
 
 func getInfo(KindType reflect.Type) string {
 	name := KindType.Name()
-	str := "Id, _ := strconv.Atoi(c.Query(\"Id\"))\n"
+	str := "id, _ := strconv.Atoi(c.Query(\"id\"))\n"
 
-	str = fmt.Sprintf("%s\tvar %sInfo %s\n", str, name, KindType)
-	str = fmt.Sprintf("%s\tmodel.First(&%sInfo,Id)\n", str, name)
+	str = fmt.Sprintf("%s\tvar %s %s\n", str, name, KindType)
+	str = fmt.Sprintf("%s\tmodel.First(&%s,id)\n", str, name)
 
 	return str
 }

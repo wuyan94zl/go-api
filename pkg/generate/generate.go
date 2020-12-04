@@ -11,7 +11,6 @@ import (
 // 设置curd控制器
 func SetCurd(kind interface{}) {
 	kindType := reflect.TypeOf(kind)
-
 	// 打开文件操作流
 	name := strings.ToLower(kindType.Name())
 	dir := getDir(name)
@@ -26,21 +25,23 @@ func SetCurd(kind interface{}) {
 	pkgStr := fmt.Sprintf("package %s%s", name, "\n")
 	// import
 	impStr := getImportStr(name)
+	var fields []map[string]mapValue
+	fields = getField(fields,kindType)
 	// create
-	createStr := getCreateFuncStr(file, kindType)
+	createStr := getCreateFuncStr(kindType,fields)
 	// 有密码字段 import 增加 bcrypt包
 	n := strings.Index(createStr,"bcrypt.GenerateFromPassword")
 	if n != -1{
 		impStr = strings.Replace(impStr,")","	\"golang.org/x/crypto/bcrypt\"\n)",1)
 	}
 	// update func
-	updateStr := getUpdateFuncStr(file, kindType)
+	updateStr := getUpdateFuncStr(kindType,fields)
 	// delete func
-	deleteStr := getDeleteFuncStr(file, kindType)
+	deleteStr := getDeleteFuncStr(kindType)
 	// info func
-	infoStr := getInfoFuncStr(file,kindType)
+	infoStr := getInfoFuncStr(kindType)
 	// Paginate func
-	paginateStr := getPaginateFuncStr(file, kindType)
+	paginateStr := getPaginateFuncStr(kindType,fields)
 
 	// 合并
 	rightStr := fmt.Sprintf("%s%s%s%s%s%s%s",pkgStr,impStr,createStr,updateStr,deleteStr,infoStr,paginateStr)

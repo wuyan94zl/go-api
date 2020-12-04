@@ -2,26 +2,11 @@ package generate
 
 import (
 	"fmt"
-	"os"
 	"reflect"
 )
 
-// 设置更新信息
-func setInfo(KindType reflect.Type) string {
-	name := KindType.Name()
-	param := ""
-	for i := 0; i < KindType.NumField(); i++ {
-		if !KindType.Field(i).Anonymous {
-			if KindType.Field(i).Tag.Get("validate") != "" {
-				param = fmt.Sprintf("%s\t%sInfo.%s = c.PostForm(\"%s\")\n", param, name, KindType.Field(i).Name, KindType.Field(i).Name)
-			}
-		}
-	}
-	return param
-}
-
 // 创建Update方法
-func getUpdateFuncStr(file *os.File, kind reflect.Type) string{
+func getUpdateFuncStr(KindType reflect.Type, fields []map[string]mapValue) string{
 	str := `
 func Update(c *gin.Context) {
 	// 验证参数
@@ -29,8 +14,8 @@ func Update(c *gin.Context) {
 `
 	// 参数验证信息
 	var rlt []map[string]mapValue
-	rlt = append(rlt, map[string]mapValue{"Id": {validateInfo: "required,min:1"}})
-	fields := getField(rlt, kind)
+	rlt = append(rlt, map[string]mapValue{"id": {validateInfo: "required,min:1"}})
+
 	data := setValidate(fields)
 	str = fmt.Sprintf("%s\n%s", str, data)
 	// 参数验证信息
@@ -40,28 +25,26 @@ func Update(c *gin.Context) {
 		return
 	}`
 	str = fmt.Sprintf("%s\n%s", str, data)
+
 	// 查询信息
-	data = getInfo(kind)
+	data = getInfo(KindType)
 	str = fmt.Sprintf("%s\n\t%s", str, data)
 	// 数据不存在
-	data = `	if %sInfo.Id == 0 {
+	data = `	if %s.Id == 0 {
 		utils.SuccessErr(c, -1000, "数据不存在")
 		return
 	}`
-	data = fmt.Sprintf(data, kind.Name())
+	data = fmt.Sprintf(data, KindType.Name())
 	str = fmt.Sprintf("%s%s\n", str, data)
 
 	// 设置更改信息
-	data = setInfo(kind)
+	data = getModelData(KindType,fields)
 	str = fmt.Sprintf("%s\n%s", str, data)
 	// 更改操作
-	data = fmt.Sprintf("model.UpdateOne(%sInfo)", kind.Name())
-	str = fmt.Sprintf("%s\n\t%s", str, data)
+	data = fmt.Sprintf("model.UpdateOne(%s)", KindType.Name())
+	str = fmt.Sprintf("%s\t%s", str, data)
 
-	data = `
-	utils.SuccessData(c, %sInfo) // 返回创建成功的信息
-}`
-	data = fmt.Sprintf(data, kind.Name())
+	data = fmt.Sprintf("\tutils.SuccessData(c, %s) // 返回创建成功的信息\n}", KindType.Name())
 	str = fmt.Sprintf("%s\n%s", str, data)
 	return str
 	//file.Write([]byte(str))

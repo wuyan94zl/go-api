@@ -12,11 +12,7 @@ func ApiRouter(router *gin.Engine) {
 	api.POST("/admin/login", admin.Login) // 登录
 
 	// 登录鉴权路由
-	auth := router.Group("api")      // 认证路由组
-	auth.Use(middleware.ApiAuth())   // 登录认证中间件
+	auth := router.Group("api")             // 认证路由组
+	auth.Use(middleware.ApiAuth())          // 登录认证中间件
 	auth.GET("/admin/auth", admin.AuthInfo) // 登录用户信息
 }
-
-
-
-
