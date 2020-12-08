@@ -8,7 +8,7 @@ import (
 func Start() *gin.Engine{
 	// 数据库初始化
 	autoMigrate()
-	router := gin.Default() // 获取路由实例
-	routes.ApiRouter(router) // 注册路由
+	// 路由注册
+	router := routes.Register()
 	return router // 返回路由
 }

@@ -6,6 +6,6 @@ import (
 )
 
 // 注册路由列表
-func ApiRouter(router *gin.RouterGroup) {
-	router.POST("/admin/login", admin.Login) // 登录
+func AuthRouter(router *gin.RouterGroup) {
+	router.GET("/admin/auth", admin.AuthInfo) // 登录用户信息
 }

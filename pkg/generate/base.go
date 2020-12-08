@@ -15,11 +15,15 @@ type mapValue struct {
 }
 
 // 获取文件位置
-func getDir(name string) string {
+func getDir(name string, uri string) string {
 	baseDir, _ := os.Getwd()
-	dir := fmt.Sprintf("%s%s%s", baseDir, "\\app\\controllers\\", name)
+	if uri != "" {
+		uri = fmt.Sprintf("%s\\", uri)
+	}
+	dir := fmt.Sprintf("%s%s%s%s", baseDir, "\\app\\controllers\\", uri, name)
+	fmt.Println(dir, uri)
 	setDir(dir)
-	filePath := fmt.Sprintf("%s%s%s%s%s", baseDir, "\\app\\controllers\\", name, "\\", "curd.go")
+	filePath := fmt.Sprintf("%s%s%s", dir, "\\", "curd.go")
 	setFile(filePath)
 	return filePath
 }
@@ -29,8 +33,7 @@ func setDir(dir string) {
 	_, err := os.Stat(dir)
 	if err != nil {
 		if os.IsNotExist(err) {
-			os.Mkdir(dir, 0777)
-			fmt.Println("创建文件夹")
+			_ = os.MkdirAll(dir, 0777)
 		}
 	}
 }

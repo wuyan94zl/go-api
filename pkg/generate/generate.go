@@ -9,11 +9,11 @@ import (
 )
 
 // 设置curd控制器
-func SetCurd(kind interface{}) {
+func SetCurd(kind interface{},uri string) {
 	kindType := reflect.TypeOf(kind)
 	// 打开文件操作流
 	name := strings.ToLower(kindType.Name())
-	dir := getDir(name)
+	dir := getDir(name,uri)
 	file, err := os.OpenFile(dir, os.O_WRONLY, 0777)
 	if err != nil {
 		panic(err)
@@ -54,11 +54,17 @@ func SetCurd(kind interface{}) {
 }
 
 // 设置路由
-func SetRoute(kind interface{})  {
+func SetRoute(kind interface{},uri string,pkgUri string)  {
 	name := strings.ToLower(reflect.TypeOf(kind).Name())
 	dir, _ := os.Getwd()
-	filePath := fmt.Sprintf("%s%s",dir,"\\routes\\api.go")
-	data,_ := ioutil.ReadFile(filePath)
+	if uri == ""{
+		uri = "api"
+	}
+	filePath := fmt.Sprintf("%s\\routes\\%s.go",dir,uri)
+	data,err := ioutil.ReadFile(filePath)
+	if err != nil {
+		panic("文件不存在")
+	}
 	dataString := string(data)
 
 	// 设置关键字
@@ -72,11 +78,11 @@ func SetRoute(kind interface{})  {
 	// 写入路由信息
 	addStr := `
 	// start %s
-	api.POST("/%s/create",%s.Create)
-	api.POST("/%s/update",%s.Update)
-	api.GET("/%s/delete",%s.Delete)
-	api.GET("/%s/info",%s.Info)
-	api.POST("/%s/paginate",%s.Paginate)
+	router.POST("/%s/create",%s.Create)
+	router.POST("/%s/update",%s.Update)
+	router.GET("/%s/delete",%s.Delete)
+	router.GET("/%s/info",%s.Info)
+	router.POST("/%s/paginate",%s.Paginate)
 	// end %s
 }
 `
@@ -84,7 +90,10 @@ func SetRoute(kind interface{})  {
 	dataString = strings.Replace(dataString,"}",addStr,1)
 
 	// 包路径
-	pkgPath := fmt.Sprintf("%s%s","github.com/wuyan94zl/api/app/controllers/",name)
+	if pkgUri != ""{
+		pkgUri = fmt.Sprintf("%s/",pkgUri)
+	}
+	pkgPath := fmt.Sprintf("%s%s%s","github.com/wuyan94zl/api/app/controllers/",pkgUri,name)
 	num = strings.Index(dataString,pkgPath)
 	// 没有找到包路径，添加包路径
 	if num == -1{
