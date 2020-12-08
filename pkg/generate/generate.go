@@ -24,7 +24,7 @@ func SetCurd(kind interface{},uri string) {
 	// package
 	pkgStr := fmt.Sprintf("package %s%s", name, "\n")
 	// import
-	impStr := getImportStr(name)
+	impStr := getImportStr(kindType.PkgPath())
 	var fields []map[string]mapValue
 	fields = getField(fields,kindType)
 	// create

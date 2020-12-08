@@ -6,7 +6,7 @@ func getImportStr(name string)  string{
 	imp := `import (
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"github.com/wuyan94zl/api/app/models/%s"
+	"%s"
 	"github.com/wuyan94zl/api/pkg/model"
 	"github.com/wuyan94zl/api/pkg/utils"
 	"strconv"

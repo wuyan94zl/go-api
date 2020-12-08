@@ -12,13 +12,20 @@ func Create(model interface{}){
 /** start查询相关 */
 
 // 主键获取一条数据
-func First(model interface{},id interface{}){
-	database.DB.First(model,id)
+func First(model interface{},id interface{},relationship ...string){
+	rom := database.DB
+	for _,v := range relationship{
+		rom = rom.Preload(v)
+	}
+	rom.First(model,id)
 }
 
 // 条件获取一条数据
-func GetOne(model interface{},condition []Condition){
+func GetOne(model interface{},condition []Condition,relationship ...string){
 	rom := orm(condition)
+	for _,v := range relationship{
+		rom = rom.Preload(v)
+	}
 	rom.First(model)
 }
 
@@ -37,14 +44,18 @@ func GetAll(model interface{},condition []Condition,limit ...int){
 }
 
 // 单表分页查询
-func Paginate(model interface{}, pageInfo PageInfo, condition []Condition) PageList {
+func Paginate(model interface{}, pageInfo PageInfo, condition []Condition,relationship ...string) PageList {
 	offset := (pageInfo.Page - 1) * pageInfo.PageSize
 	limit := pageInfo.PageSize
 	rom := orm(condition)
 	var count int64
 	rom.Model(model).Count(&count)
 	if count > 0 {
-		rom.Offset(int(offset)).Limit(int(limit)).Find(model)
+		rom = rom.Offset(int(offset)).Limit(int(limit))
+		for _,v := range relationship{
+			rom = rom.Preload(v)
+		}
+		rom.Find(model)
 	}
 	lastPage := (count / pageInfo.PageSize) + 1
 	return PageList{CurrentPage: pageInfo.Page, FirstPage: 1, LastPage: lastPage, PageSize: pageInfo.PageSize, Total: count, Data: model}

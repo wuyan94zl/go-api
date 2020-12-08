@@ -49,7 +49,8 @@ func Paginate(c *gin.Context) {
 	str = fmt.Sprintf("%s%s\n", str, data)
 	data = "	pageSize, _ := strconv.Atoi(c.DefaultQuery(\"page_size\", \"10\"))"
 	str = fmt.Sprintf("%s%s\n", str, data)
-	str = fmt.Sprintf("%s\tlists := model.Paginate(&%s, model.PageInfo{Page: int64(page), PageSize: int64(pageSize)}, conditions)\n", str, kind.Name())
+	relationshipStr := getRelationshipStr()
+	str = fmt.Sprintf("%s\tlists := model.Paginate(&%s, model.PageInfo{Page: int64(page), PageSize: int64(pageSize)}, conditions%s)\n", str, kind.Name(),relationshipStr)
 
 	str = fmt.Sprintf("%s\tutils.SuccessData(c, lists)\n}", str)
 	return str

@@ -10,9 +10,10 @@ import (
 type mapValue struct {
 	validateInfo     string
 	searchInfo       string
-	relationshipInfo string
 	typeInfo         string
 }
+
+var relationshipInfo []string
 
 // 获取文件位置
 func getDir(name string, uri string) string {
@@ -57,7 +58,9 @@ func getField(rlt []map[string]mapValue, KindType reflect.Type) []map[string]map
 			var v mapValue
 			v.searchInfo = KindType.Field(i).Tag.Get("search")
 			v.validateInfo = KindType.Field(i).Tag.Get("validate")
-			v.relationshipInfo = KindType.Field(i).Tag.Get("relationship")
+			if KindType.Field(i).Type.Kind().String() == "struct" || KindType.Field(i).Type.Kind().String() == "slice"{
+				relationshipInfo = append(relationshipInfo,KindType.Field(i).Name)
+			}
 			if KindType.Field(i).Tag.Get("pwd") != "" {
 				v.typeInfo = "pwd"
 			} else {
@@ -173,12 +176,23 @@ func setToLower(k string) string {
 	return k
 }
 
+func getRelationshipStr() string{
+	relationshipStr := ""
+	if len(relationshipInfo) > 0{
+		for _,v := range relationshipInfo{
+			relationshipStr = fmt.Sprintf(`%s%s"%s"`,relationshipStr,",",v)
+		}
+	}
+	return relationshipStr
+}
+
 func getInfo(KindType reflect.Type) string {
 	name := KindType.Name()
 	str := "id, _ := strconv.Atoi(c.Query(\"id\"))\n"
 
 	str = fmt.Sprintf("%s\tvar %s %s\n", str, name, KindType)
-	str = fmt.Sprintf("%s\tmodel.First(&%s,id)\n", str, name)
+	relationshipStr := getRelationshipStr()
+	str = fmt.Sprintf("%s\tmodel.First(&%s,id%s)\n", str, name,relationshipStr)
 
 	return str
 }
