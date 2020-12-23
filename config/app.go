@@ -26,5 +26,10 @@ func init() {
 		// 用以生成链接
 		"url": config.Env("APP_URL", "http://localhost:3000"),
 	})
+
+	config.Add("jwt",config.StrMap{
+		"export":config.Env("JWT_EXPORT",7200),
+		"secretary":config.Env("JWT_SECRETARY","wuyan94zl"),
+	})
 }
 

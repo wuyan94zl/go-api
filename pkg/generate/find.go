@@ -35,7 +35,7 @@ func setSearch(data []map[string]mapValue) string {
 }
 
 // 创建分类列表查询方法
-func getPaginateFuncStr(kind reflect.Type,fields []map[string]mapValue) string{
+func getPaginateFuncStr(kind reflect.Type, fields []map[string]mapValue) string {
 	str := `
 func Paginate(c *gin.Context) {
 	var conditions []model.Condition
@@ -50,14 +50,14 @@ func Paginate(c *gin.Context) {
 	data = "	pageSize, _ := strconv.Atoi(c.DefaultQuery(\"page_size\", \"10\"))"
 	str = fmt.Sprintf("%s%s\n", str, data)
 	relationshipStr := getRelationshipStr()
-	str = fmt.Sprintf("%s\tlists := model.Paginate(&%s, model.PageInfo{Page: int64(page), PageSize: int64(pageSize)}, conditions%s)\n", str, kind.Name(),relationshipStr)
+	str = fmt.Sprintf("%s\tlists := model.Paginate(&%s, model.PageInfo{Page: int64(page), PageSize: int64(pageSize)}, conditions%s)\n", str, kind.Name(), relationshipStr)
 
 	str = fmt.Sprintf("%s\tutils.SuccessData(c, lists)\n}", str)
 	return str
 }
 
 // 创建详细数据方法
-func getInfoFuncStr(kind reflect.Type) string{
+func getInfoFuncStr(kind reflect.Type) string {
 	str := `
 func Info(c *gin.Context) {
 `

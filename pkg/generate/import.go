@@ -2,7 +2,7 @@ package generate
 
 import "fmt"
 
-func getImportStr(name string)  string{
+func getImportStr(name string) string {
 	imp := `import (
 	"fmt"
 	"github.com/gin-gonic/gin"
@@ -12,6 +12,6 @@ func getImportStr(name string)  string{
 	"strconv"
 )
 `
-	imp = fmt.Sprintf(imp,name)
+	imp = fmt.Sprintf(imp, name)
 	return imp
 }

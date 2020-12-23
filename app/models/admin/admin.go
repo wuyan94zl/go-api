@@ -1,12 +1,10 @@
 package admin
 
 import (
-	"github.com/wuyan94zl/api/app/models"
+	"github.com/wuyan94zl/api/pkg/rbac/model"
 )
 
 type Admin struct {
-	models.BaseModel
-	Email    string `validate:"required,min:6,email"search:"like"`
-	Password string `validate:"min:6"pwd:"pwd"`
-	Name     string `validate:"required,min:6"search:"like"`
+	model.User
+	Phone string `validate:"required,min:11,max:11"search:"="`
 }

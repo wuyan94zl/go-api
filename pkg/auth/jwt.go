@@ -1,28 +1,31 @@
 package auth
+
 import (
 	"fmt"
 	jwt "github.com/dgrijalva/jwt-go"
 	"github.com/wuyan94zl/api/app/models/admin"
+	"github.com/wuyan94zl/api/pkg/config"
 	"github.com/wuyan94zl/api/pkg/database"
+	"strconv"
 	"time"
 )
+
 // 定义授权保存信息
 type CustomClaims struct {
-	Id	uint64
+	Id      uint64
 	ExpTime int64
 	jwt.StandardClaims
 }
-// 私钥
-const (
-	SECRETARY = "wuyan-secret-key"
-)
+
+var secretary = config.GetString("jwt.secretary")
+
 // 获取用户token值
-func GetToken(data *admin.Admin) (map[string]interface{},error) {
+func GetToken(data *admin.Admin) (map[string]interface{}, error) {
 	// 7200秒过期
-	maxAge := 7200
-	expTime := time.Now().Add(time.Duration(maxAge)*time.Second).Unix()
+	maxAge, _ := strconv.Atoi(config.GetString("jwt.export"))
+	expTime := time.Now().Add(time.Duration(maxAge) * time.Second).Unix()
 	customClaims := &CustomClaims{
-		Id: data.Id,
+		Id:      data.Id,
 		ExpTime: expTime,
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: expTime, // 过期时间，必须设置
@@ -30,14 +33,14 @@ func GetToken(data *admin.Admin) (map[string]interface{},error) {
 		},
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, customClaims)
-	tokenString, err := token.SignedString([]byte(SECRETARY))
+	tokenString, err := token.SignedString([]byte(secretary))
 	if err != nil {
-		return nil,err
+		return nil, err
 	}
 	rlt := make(map[string]interface{})
 	rlt["expTime"] = expTime
 	rlt["token"] = tokenString
-	return rlt,nil
+	return rlt, nil
 }
 
 // 使用token换取user信息
@@ -46,13 +49,13 @@ func GetUser(tokenString string) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
 		}
-		return []byte(SECRETARY), nil
+		return []byte(secretary), nil
 	})
 	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
 		id := int(claims["Id"].(float64))
 		admin := admin.Admin{}
-		database.DB.First(&admin,id)
-		return admin,nil
+		database.DB.First(&admin, id)
+		return admin, nil
 	} else {
 		return nil, err
 	}

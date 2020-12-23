@@ -6,7 +6,7 @@ import (
 )
 
 // 创建Update方法
-func getUpdateFuncStr(KindType reflect.Type, fields []map[string]mapValue) string{
+func getUpdateFuncStr(KindType reflect.Type, fields []map[string]mapValue) string {
 	str := `
 func Update(c *gin.Context) {
 	// 验证参数
@@ -38,7 +38,7 @@ func Update(c *gin.Context) {
 	str = fmt.Sprintf("%s%s\n", str, data)
 
 	// 设置更改信息
-	data = getModelData(KindType,fields)
+	data = getModelData(KindType, fields)
 	str = fmt.Sprintf("%s\n%s", str, data)
 	// 更改操作
 	data = fmt.Sprintf("model.UpdateOne(%s)", KindType.Name())

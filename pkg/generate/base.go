@@ -8,12 +8,10 @@ import (
 )
 
 type mapValue struct {
-	validateInfo     string
-	searchInfo       string
-	typeInfo         string
+	validateInfo string
+	searchInfo   string
+	typeInfo     string
 }
-
-var relationshipInfo []string
 
 // 获取文件位置
 func getDir(name string, uri string) string {
@@ -53,13 +51,16 @@ func setFile(file string) {
 // 获取字段信息
 func getField(rlt []map[string]mapValue, KindType reflect.Type) []map[string]mapValue {
 	for i := 0; i < KindType.NumField(); i++ {
+		if KindType.Field(i).Name == "Id" || KindType.Field(i).Name == "CreatedAt" || KindType.Field(i).Name == "UpdatedAt" || KindType.Field(i).Name == "DeletedAt" {
+			continue
+		}
 		if !KindType.Field(i).Anonymous {
 			item := make(map[string]mapValue)
 			var v mapValue
 			v.searchInfo = KindType.Field(i).Tag.Get("search")
 			v.validateInfo = KindType.Field(i).Tag.Get("validate")
-			if KindType.Field(i).Type.Kind().String() == "struct" || KindType.Field(i).Type.Kind().String() == "slice"{
-				relationshipInfo = append(relationshipInfo,KindType.Field(i).Name)
+			if KindType.Field(i).Tag.Get("relationship") != "" {
+				relationshipInfo = append(relationshipInfo, relationship{name: KindType.Field(i).Name, structType: KindType.Field(i).Type.Kind().String(), tag: KindType.Field(i).Tag.Get("relationship")})
 			}
 			if KindType.Field(i).Tag.Get("pwd") != "" {
 				v.typeInfo = "pwd"
@@ -68,6 +69,11 @@ func getField(rlt []map[string]mapValue, KindType reflect.Type) []map[string]map
 			}
 			item[KindType.Field(i).Name] = v
 			rlt = append(rlt, item)
+		} else {
+			child := getField(rlt, KindType.Field(i).Type)
+			for _, v := range child {
+				rlt = append(rlt, v)
+			}
 		}
 	}
 	return rlt
@@ -102,7 +108,7 @@ func getModelData(KindType reflect.Type, data []map[string]mapValue) string {
 		for k, v := range mapVal {
 			lowerK := setToLower(k)
 			if v.typeInfo == "pwd" {
-				pwd = `pwd, _ := bcrypt.GenerateFromPassword([]byte(c.PostForm("%s")), bcrypt.DefaultCost)`
+				pwd = `	pwd, _ := bcrypt.GenerateFromPassword([]byte(c.PostForm("%s")), bcrypt.DefaultCost)`
 				pwd = fmt.Sprintf(pwd, lowerK)
 				param = fmt.Sprintf("%s\t%s.%s = string(%s)\n", param, name, k, "pwd")
 			} else {
@@ -176,23 +182,13 @@ func setToLower(k string) string {
 	return k
 }
 
-func getRelationshipStr() string{
-	relationshipStr := ""
-	if len(relationshipInfo) > 0{
-		for _,v := range relationshipInfo{
-			relationshipStr = fmt.Sprintf(`%s%s"%s"`,relationshipStr,",",v)
-		}
-	}
-	return relationshipStr
-}
-
 func getInfo(KindType reflect.Type) string {
 	name := KindType.Name()
 	str := "id, _ := strconv.Atoi(c.Query(\"id\"))\n"
 
 	str = fmt.Sprintf("%s\tvar %s %s\n", str, name, KindType)
 	relationshipStr := getRelationshipStr()
-	str = fmt.Sprintf("%s\tmodel.First(&%s,id%s)\n", str, name,relationshipStr)
+	str = fmt.Sprintf("%s\tmodel.First(&%s,id%s)\n", str, name, relationshipStr)
 
 	return str
 }

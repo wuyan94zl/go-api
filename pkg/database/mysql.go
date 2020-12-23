@@ -40,7 +40,8 @@ func SetMysqlDB() {
 		},
 	)
 	DB, errDb = gorm.Open(mysql.Open(dsn), &gorm.Config{
-		Logger: newLogger,
+		Logger:                                   newLogger,
+		DisableForeignKeyConstraintWhenMigrating: true,
 	})
 
 	sqlDB, _ := DB.DB()
