@@ -1,16 +1,9 @@
-package model
+package orm
 
 import (
 	"fmt"
-	"github.com/wuyan94zl/api/pkg/database"
 	"gorm.io/gorm"
 )
-
-// 分页数据
-type PageInfo struct {
-	Page     int64
-	PageSize int64
-}
 
 // 分页返回数
 type PageList struct {
@@ -22,31 +15,33 @@ type PageList struct {
 	Data        interface{}
 }
 
+func SetPageList(data interface{}, currentPage int64, pageSize ...int64) *PageList {
+	pageList := &PageList{CurrentPage: currentPage, FirstPage: 1, Data: data}
+	if len(pageSize) > 0 {
+		pageList.PageSize = pageSize[0]
+	}
+	return pageList
+}
+
 // 查询条件
 type Condition struct {
 	Key   string
-	Value string
+	Value interface{}
 	Way   string
 }
 
 /**
 设置condition 查询条件数据
 */
-func SetCondition(params []Condition,key string,val string,where ...string) []Condition {
-	condition := Condition{Key: key,Value: val}
-	if where != nil{
+func SetCondition(params []Condition, key string, val interface{}, where ...string) []Condition {
+	condition := Condition{Key: key, Value: val}
+	if where != nil {
 		condition.Way = where[0]
-	}else{
+	} else {
 		condition.Way = "="
 	}
 	params = append(params, condition)
 	return params
-}
-
-func orm(condition []Condition) *gorm.DB {
-	query, values := formatQuery(condition)
-	rom := database.DB
-	return getConditionOrm(rom, query, values)
 }
 
 func formatQuery(condition []Condition) (string, []interface{}) {

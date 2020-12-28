@@ -3,23 +3,25 @@ package rbac
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/wuyan94zl/api/pkg/rbac/controller"
+	"github.com/wuyan94zl/api/pkg/utils"
 )
 
 // 注册路由列表
-func RbacRouter(router *gin.RouterGroup) {
-	router.POST("/role/create", controller.RoleCreate)
-	router.POST("/role/update", controller.RoleUpdate)
-	router.GET("/role/delete", controller.RoleDelete)
-	router.GET("/role/info", controller.RoleInfo)
-	router.POST("/role/paginate", controller.RolePaginate)
+func RegisterRouter(router *gin.RouterGroup) {
+	utils.AddRoute(router, "POST", "/role/create", controller.RoleCreate)
+	utils.AddRoute(router, "POST", "/role/update", controller.RoleUpdate)
+	utils.AddRoute(router, "GET", "/role/delete", controller.RoleDelete)
+	utils.AddRoute(router, "GET", "/role/info", controller.RoleInfo)
+	utils.AddRoute(router, "POST", "/role/paginate", controller.RolePaginate)
+	utils.AddRoute(router, "POST", "/role/menu/permission", controller.RolePaginate)
 
-	router.POST("/permission/create", controller.PermissionCreate)
-	router.POST("/permission/update", controller.PermissionUpdate)
-	router.GET("/permission/delete", controller.PermissionDelete)
-	router.POST("/permission/paginate", controller.PermissionPaginate)
+	utils.AddRoute(router, "POST", "/permission/create", controller.PermissionCreate)
+	utils.AddRoute(router, "POST", "/permission/update", controller.PermissionUpdate)
+	utils.AddRoute(router, "GET", "/permission/delete", controller.PermissionDelete)
+	utils.AddRoute(router, "GET", "/permission/lists", controller.PermissionList)
 
-	router.POST("/menu/create", controller.MenuCreate)
-	router.POST("/menu/update", controller.MenuUpdate)
-	router.GET("/menu/delete", controller.MenuDelete)
-	router.POST("/menu/paginate", controller.MenuPaginate)
+	utils.AddRoute(router, "POST", "/menu/create", controller.MenuCreate)
+	utils.AddRoute(router, "POST", "/menu/update", controller.MenuUpdate)
+	utils.AddRoute(router, "GET", "/menu/delete", controller.MenuDelete)
+	utils.AddRoute(router, "GET", "/menu/lists", controller.MenuList)
 }

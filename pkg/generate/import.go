@@ -7,7 +7,7 @@ func getImportStr(name string) string {
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"%s"
-	"github.com/wuyan94zl/api/pkg/model"
+	"github.com/wuyan94zl/api/pkg/orm"
 	"github.com/wuyan94zl/api/pkg/utils"
 	"strconv"
 )

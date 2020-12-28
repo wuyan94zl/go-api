@@ -1,9 +1,10 @@
 package controller
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
-	"github.com/wuyan94zl/api/app/models/rbac"
-	"github.com/wuyan94zl/api/pkg/model"
+	"github.com/wuyan94zl/api/pkg/orm"
+	"github.com/wuyan94zl/api/pkg/rbac/model"
 	"github.com/wuyan94zl/api/pkg/utils"
 	"strconv"
 )
@@ -20,11 +21,11 @@ func RoleCreate(c *gin.Context) {
 		utils.SuccessErr(c, 403, validate)
 		return
 	}
-	var Role rbac.Role
+	var Role model.Role
 	Role.Name = c.PostForm("name")
 	Role.Description = c.PostForm("description")
 
-	model.Create(&Role)
+	orm.GetInstance().Create(&Role)
 	utils.SuccessData(c, Role) // 返回创建成功的信息
 }
 func RoleUpdate(c *gin.Context) {
@@ -40,8 +41,8 @@ func RoleUpdate(c *gin.Context) {
 		return
 	}
 	id, _ := strconv.Atoi(c.Query("id"))
-	var Role rbac.Role
-	model.First(&Role, id)
+	var Role model.Role
+	orm.GetInstance().First(&Role,id)
 	if Role.Id == 0 {
 		utils.SuccessErr(c, -1000, "数据不存在")
 		return
@@ -49,42 +50,50 @@ func RoleUpdate(c *gin.Context) {
 
 	Role.Name = c.PostForm("name")
 	Role.Description = c.PostForm("description")
-
-	model.UpdateOne(Role)
+	orm.GetInstance().Save(Role)
 	utils.SuccessData(c, Role) // 返回创建成功的信息
 }
 func RoleDelete(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Query("id"))
-	var Role rbac.Role
+	var Role model.Role
 
-	model.First(&Role, id)
+	orm.GetInstance().First(&Role,id)
 	if Role.Id == 0 {
 		utils.SuccessErr(c, -1000, "数据不存在")
 		return
 	}
-	model.DeleteOne(&Role)
-	model.DeleteOne(Role.Menus)
-	model.DeleteOne(Role.Permissions)
+	orm.GetInstance().Delete(Role)
+	orm.GetInstance().Delete(Role.Menus)
+	orm.GetInstance().Delete(Role.Permissions)
 	utils.SuccessData(c, "删除成功")
 }
 func RoleInfo(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Query("id"))
-	var Role rbac.Role
-	model.First(&Role, id, "Menus", "Permissions")
-
+	var Role model.Role
+	orm.GetInstance().First(&Role, id, "Menus", "Permissions")
 	utils.SuccessData(c, Role)
 }
 
-func RolePermission(c *gin.Context){
-
+func RolePermissionMenu(c *gin.Context) {
+	permissionId := c.DefaultPostForm("permission_id", "")
+	roleId := c.Query("id")
+	role := model.Role{}
+	orm.GetInstance().First(&role,roleId)
+	role.DelPermissionMenu()
+	if permissionId != "" {
+		role.SetPermissionMenu(permissionId)
+	}
+	utils.SuccessData(c, "设置成功")
 }
 
 func RolePaginate(c *gin.Context) {
-	var conditions []model.Condition
+	var conditions []orm.Condition
 
-	var Role []rbac.Role
+	var Role []model.Role
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
-	pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "10"))
-	lists := model.Paginate(&Role, model.PageInfo{Page: int64(page), PageSize: int64(pageSize)}, conditions)
-	utils.SuccessData(c, lists)
+	pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "3"))
+	paginate := orm.SetPageList(&Role, int64(page), int64(pageSize))
+	fmt.Println(paginate)
+	orm.GetInstance().SetOrder("id desc").Paginate(paginate,conditions)
+	utils.SuccessData(c, paginate)
 }

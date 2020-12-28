@@ -4,7 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/wuyan94zl/api/app/models/admin"
 	"github.com/wuyan94zl/api/pkg/auth"
-	"github.com/wuyan94zl/api/pkg/model"
+	"github.com/wuyan94zl/api/pkg/orm"
 	"github.com/wuyan94zl/api/pkg/utils"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -23,10 +23,10 @@ func Login(c *gin.Context) {
 	// 查询获取到用户
 	email := c.PostForm("email")
 	password := c.PostForm("password")
-	var condition []model.Condition
-	condition = model.SetCondition(condition,"email",email)
+	var condition []orm.Condition
+	condition = orm.SetCondition(condition,"email",email)
 	info := admin.Admin{}
-	model.GetOne(&info, condition)
+	orm.GetInstance().SetLimit(0,1).Get(&info, condition)
 	if info.Id == 0 {
 		utils.SuccessErr(c, -1000, "用户名或密码错误")
 		return

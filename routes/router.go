@@ -1,24 +1,10 @@
 package routes
+
 import (
 	"github.com/gin-gonic/gin" // 基于 gin 框架
 	"github.com/wuyan94zl/api/app/middleware"
 	"github.com/wuyan94zl/api/pkg/rbac"
 )
-
-type RouteList struct {
-	Method string
-	Route  string
-}
-
-var Post = "POST"
-var Get = "GET"
-
-var Routes map[int]RouteList
-
-// 添加路由
-func AddRoute(){
-
-}
 
 // 注册当前
 func Register() *gin.Engine {
@@ -36,7 +22,7 @@ func Register() *gin.Engine {
 
 	ApiRouter(api)
 	AuthRouter(authApi)
-	rbac.RbacRouter(permissionApi)
+	rbac.RegisterRouter(permissionApi)
 
 	return router // 返回路由
 }
