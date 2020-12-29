@@ -41,7 +41,7 @@ func Update(c *gin.Context) {
 	data = getModelData(KindType, fields)
 	str = fmt.Sprintf("%s\n%s", str, data)
 	// 更改操作
-	data = fmt.Sprintf("model.UpdateOne(%s)", KindType.Name())
+	data = fmt.Sprintf("orm.GetInstance().Save(%s)", KindType.Name())
 	str = fmt.Sprintf("%s\t%s", str, data)
 
 	data = fmt.Sprintf("\tutils.SuccessData(c, %s) // 返回创建成功的信息\n}", KindType.Name())

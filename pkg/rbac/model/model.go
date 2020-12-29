@@ -66,9 +66,9 @@ type Menu struct {
 
 // 用户设置角色
 func (user *User) SetRole(roleId string) {
-	var condition []orm.Condition
-	condition = orm.SetCondition(condition, "user_id", user.Id)
-	orm.GetInstance().SetCondition(condition).DB.Delete(&UserRole{})
+	where := make(map[string]interface{})
+	where["user_id"] = user.Id
+	orm.GetInstance().Where(where).DB.Delete(&UserRole{})
 
 	ids := strings.Split(roleId, ",")
 	var userHasRole []UserRole
@@ -82,10 +82,11 @@ func (user *User) SetRole(roleId string) {
 // 设置角色权限菜单
 func (role *Role) SetPermissionMenu(permissionId string) {
 	ids := strings.Split(permissionId, ",")
-	var menuCondition []orm.Condition
-	menuCondition = orm.SetCondition(menuCondition, "id", ids, "IN")
+	where := make(map[string]interface{})
+	where["id"] = orm.Where{Way: "IN",Value: ids}
+
 	var permissions []Permission
-	orm.GetInstance().Get(&permissions, menuCondition)
+	orm.GetInstance().Where(where).Get(&permissions)
 	mapV := make(map[uint64]uint64)
 	var addPermission []RoleHasPermission
 	var addMenu []RoleHasMenu
@@ -103,10 +104,10 @@ func (role *Role) SetPermissionMenu(permissionId string) {
 
 // 删除角色权限菜单
 func (role *Role) DelPermissionMenu() {
-	var conditions []orm.Condition
-	conditions = orm.SetCondition(conditions, "role_id", role.Id)
-	orm.GetInstance().SetCondition(conditions).DB.Delete(RoleHasPermission{})
-	orm.GetInstance().SetCondition(conditions).DB.Delete(RoleHasMenu{})
+	where := make(map[string]interface{})
+	where["role_id"] = role.Id
+	orm.GetInstance().Where(where).DB.Delete(RoleHasPermission{})
+	orm.GetInstance().Where(where).DB.Delete(RoleHasMenu{})
 }
 
 func RecursionMenuList(data []Menu, pid uint64, level uint64) []Menu {

@@ -16,16 +16,19 @@ func setSearch(data []map[string]mapValue) string {
 				str = fmt.Sprintf("%s\tif %s != \"\" {\n", str, k)
 				switch v.searchInfo {
 				case "=":
-					str = fmt.Sprintf("%s\t\tconditions = model.SetCondition(conditions,\"%s\",%s)\n", str, lowerK, k)
+					str = fmt.Sprintf("%s\t\twhere[\"%s\"] = %s\n", str, lowerK, k)
 				case ">":
-					str = fmt.Sprintf("%s\t\tconditions = model.SetCondition(conditions,\"%s\",%s,\">\")\n", str, lowerK, k)
+					str = fmt.Sprintf("%s\t\twhere[\"%s\"] = orm.Where{Way: \">\", Value:%s}\n", str, lowerK, k)
 				case "<":
-					str = fmt.Sprintf("%s\t\tconditions = model.SetCondition(conditions,\"%s\",%s,\"<\")\n", str, lowerK, k)
+					//str = fmt.Sprintf("%s\t\tconditions = model.SetCondition(conditions,\"%s\",%s,\"<\")\n", str, lowerK, k)
+					str = fmt.Sprintf("%s\t\twhere[\"%s\"] = orm.Where{Way: \"<\", Value:%s}\n", str, lowerK, k)
 				case "!=":
-					str = fmt.Sprintf("%s\t\tconditions = model.SetCondition(conditions,\"%s\",%s,\"!=\")\n", str, lowerK, k)
+					//str = fmt.Sprintf("%s\t\tconditions = model.SetCondition(conditions,\"%s\",%s,\"!=\")\n", str, lowerK, k)
+					str = fmt.Sprintf("%s\t\twhere[\"%s\"] = orm.Where{Way: \"!=\", Value:%s}\n", str, lowerK, k)
 				case "like":
 					v := fmt.Sprintf("fmt.Sprintf(\"%s%s\", %s, \"%s\")", "%s", "%s", k, "%")
-					str = fmt.Sprintf("%s\t\tconditions = model.SetCondition(conditions,\"%s\",%s,\"like\")\n", str, lowerK, v)
+					//str = fmt.Sprintf("%s\t\tconditions = model.SetCondition(conditions,\"%s\",%s,\"like\")\n", str, lowerK, v)
+					str = fmt.Sprintf("%s\t\twhere[\"%s\"] = orm.Where{Way: \"LIKE\",Value:%s}\n", str, lowerK, v)
 				}
 				str = fmt.Sprintf("%s\t}\n", str)
 			}
@@ -38,7 +41,7 @@ func setSearch(data []map[string]mapValue) string {
 func getPaginateFuncStr(kind reflect.Type, fields []map[string]mapValue) string {
 	str := `
 func Paginate(c *gin.Context) {
-	var conditions []model.Condition
+	where := make(map[string]interface{})
 `
 	data := setSearch(fields)
 	str = fmt.Sprintf("%s%s\n", str, data)
@@ -47,10 +50,9 @@ func Paginate(c *gin.Context) {
 
 	data = "	page, _ := strconv.Atoi(c.DefaultQuery(\"page\", \"1\"))"
 	str = fmt.Sprintf("%s%s\n", str, data)
-	data = "	pageSize, _ := strconv.Atoi(c.DefaultQuery(\"page_size\", \"10\"))"
-	str = fmt.Sprintf("%s%s\n", str, data)
 	relationshipStr := getRelationshipStr()
-	str = fmt.Sprintf("%s\tlists := model.Paginate(&%s, model.PageInfo{Page: int64(page), PageSize: int64(pageSize)}, conditions%s)\n", str, kind.Name(), relationshipStr)
+	str = fmt.Sprintf("\t%s%s\n", str, "	lists := orm.SetPageList(&Admin, int64(page))")
+	str = fmt.Sprintf("%s\torm.GetInstance().Where(where).Paginate(lists%s)\n", str, relationshipStr)
 
 	str = fmt.Sprintf("%s\tutils.SuccessData(c, lists)\n}", str)
 	return str

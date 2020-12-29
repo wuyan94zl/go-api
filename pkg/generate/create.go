@@ -27,7 +27,7 @@ func Create(c *gin.Context) {
 	data = getModelData(KindType, fields)
 	str = fmt.Sprintf("%s\n%s", str, data)
 	setRelationshipStr()
-	data = `	model.Create(&%s)
+	data = `	orm.GetInstance().Create(&%s)
 	utils.SuccessData(c, %s) // 返回创建成功的信息
 }`
 	data = fmt.Sprintf(data, KindType.Name(), KindType.Name())

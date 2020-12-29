@@ -23,10 +23,10 @@ func Login(c *gin.Context) {
 	// 查询获取到用户
 	email := c.PostForm("email")
 	password := c.PostForm("password")
-	var condition []orm.Condition
-	condition = orm.SetCondition(condition,"email",email)
+	where := make(map[string]interface{})
+	where["email"] = email
 	info := admin.Admin{}
-	orm.GetInstance().SetLimit(0,1).Get(&info, condition)
+	orm.GetInstance().Where(where).One(&info)
 	if info.Id == 0 {
 		utils.SuccessErr(c, -1000, "用户名或密码错误")
 		return

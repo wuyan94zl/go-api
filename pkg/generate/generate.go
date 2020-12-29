@@ -78,11 +78,11 @@ func SetRoute(kind interface{}, uri string, pkgUri string) {
 	// 写入路由信息
 	addStr := `
 	// start %s
-	router.POST("/%s/create",%s.Create)
-	router.POST("/%s/update",%s.Update)
-	router.GET("/%s/delete",%s.Delete)
-	router.GET("/%s/info",%s.Info)
-	router.POST("/%s/paginate",%s.Paginate)
+	utils.AddRoute(router,"POST","/%s/create",%s.Create)
+	utils.AddRoute(router,"POST","/%s/update",%s.Update)
+	utils.AddRoute(router,"GET","/%s/delete",%s.Delete)
+	utils.AddRoute(router,"GET","/%s/info",%s.Info)
+	utils.AddRoute(router,"POST","/%s/paginate",%s.Paginate)
 	// end %s
 }
 `

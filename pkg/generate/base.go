@@ -188,7 +188,7 @@ func getInfo(KindType reflect.Type) string {
 
 	str = fmt.Sprintf("%s\tvar %s %s\n", str, name, KindType)
 	relationshipStr := getRelationshipStr()
-	str = fmt.Sprintf("%s\tmodel.First(&%s,id%s)\n", str, name, relationshipStr)
+	str = fmt.Sprintf("%s\torm.GetInstance().First(&%s,id%s)\n", str, name, relationshipStr)
 
 	return str
 }

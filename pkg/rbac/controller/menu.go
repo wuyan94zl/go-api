@@ -75,9 +75,8 @@ func MenuDelete(c *gin.Context) {
 	utils.SuccessData(c, "删除成功")
 }
 func MenuList(c *gin.Context) {
-	var conditions []orm.Condition
 	var Menu []model.Menu
-	orm.GetInstance().SetOrder("parent_id").Get(&Menu, conditions, "Permissions")
+	orm.GetInstance().Order("parent_id").Get(&Menu, "Permissions")
 	tree := model.RecursionMenuList(Menu, 0, 1)
 	utils.SuccessData(c, tree)
 }
