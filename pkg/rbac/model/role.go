@@ -2,25 +2,9 @@ package model
 
 import (
 	"github.com/wuyan94zl/api/pkg/orm"
-	"strconv"
 	"strings"
 	"time"
 )
-
-type User struct {
-	Id        uint64
-	Email     string    `validate:"required,min:6,email"search:"like"`
-	Password  string    `validate:"min:6"pwd:"pwd"`
-	Name      string    `validate:"required,min:6"search:"like"`
-	Roles     []Role    `gorm:"many2many:user_roles;joinForeignKey:UserID"relationship:"manyToMany"`
-	CreatedAt time.Time `gorm:"column:created_at;index"`
-	UpdatedAt time.Time `gorm:"column:updated_at"`
-}
-
-type UserRole struct {
-	UserId uint64
-	RoleId uint64
-}
 
 type Role struct {
 	Id          uint64
@@ -42,48 +26,11 @@ type RoleHasMenu struct {
 	MenuId uint64
 }
 
-type Permission struct {
-	Id          uint64
-	Name        string    `validate:"required"`
-	Route       string    `validate:"required"`
-	MenuId      uint64    `validate:"required"`
-	Description string    `validate:"required"`
-	CreatedAt   time.Time `gorm:"column:created_at;index"`
-	UpdatedAt   time.Time `gorm:"column:updated_at"`
-}
-
-type Menu struct {
-	Id          uint64
-	ParentId    uint64       `validate:"required,numeric"`
-	Name        string       `validate:"required"`
-	Route       string       `validate:"required"`
-	Description string       `validate:"required"`
-	Permissions []Permission `relationship:"hasMany"`
-	Menus       []Menu       `gorm:"-"`
-	CreatedAt   time.Time    `gorm:"column:created_at;index"`
-	UpdatedAt   time.Time    `gorm:"column:updated_at"`
-}
-
-// 用户设置角色
-func (user *User) SetRole(roleId string) {
-	where := make(map[string]interface{})
-	where["user_id"] = user.Id
-	orm.GetInstance().Where(where).DB.Delete(&UserRole{})
-
-	ids := strings.Split(roleId, ",")
-	var userHasRole []UserRole
-	for _, id := range ids {
-		uid, _ := strconv.Atoi(id)
-		userHasRole = append(userHasRole, UserRole{UserId: user.Id, RoleId: uint64(uid)})
-	}
-	orm.GetInstance().DB.Create(userHasRole)
-}
-
 // 设置角色权限菜单
 func (role *Role) SetPermissionMenu(permissionId string) {
 	ids := strings.Split(permissionId, ",")
 	where := make(map[string]interface{})
-	where["id"] = orm.Where{Way: "IN",Value: ids}
+	where["id"] = orm.Where{Way: "IN", Value: ids}
 
 	var permissions []Permission
 	orm.GetInstance().Where(where).Get(&permissions)

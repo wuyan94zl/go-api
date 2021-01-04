@@ -3,7 +3,6 @@ package admin
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/wuyan94zl/api/app/models/admin"
-	"github.com/wuyan94zl/api/pkg/auth"
 	"github.com/wuyan94zl/api/pkg/orm"
 	"github.com/wuyan94zl/api/pkg/utils"
 	"golang.org/x/crypto/bcrypt"
@@ -13,11 +12,11 @@ import (
 func Login(c *gin.Context) {
 	// 验证参数
 	data := make(map[string][]string)
-	data["email"] = []string{"required","min:6","email"}
-	data["password"] = []string{"required","between:6,20"}
+	data["email"] = []string{"required", "min:6", "email"}
+	data["password"] = []string{"required", "between:6,20"}
 	validate := utils.Validator(c.Request, data)
-	if validate != nil{
-		utils.SuccessErr(c,403,validate)
+	if validate != nil {
+		utils.SuccessErr(c, 403, validate)
 		return
 	}
 	// 查询获取到用户
@@ -36,7 +35,7 @@ func Login(c *gin.Context) {
 		return
 	}
 	// 换取token
-	token, err := auth.GetToken(&info)
+	token, err := info.Token()
 	if err != nil {
 		utils.SuccessErr(c, -1000, "未知错误")
 	} else {
@@ -46,6 +45,6 @@ func Login(c *gin.Context) {
 
 // 获取登录用户信息
 func AuthInfo(c *gin.Context) {
-	u := c.MustGet("admin").(admin.Admin)
+	u := c.MustGet("auth").(admin.Admin)
 	utils.SuccessData(c, u)
 }
