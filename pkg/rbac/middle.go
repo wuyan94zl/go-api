@@ -9,7 +9,7 @@ func PermissionCheck() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		id := c.MustGet("auth_id").(uint64)
 		url := c.Request.URL.Path
-		if id == 2 || CheckPermission(id, url){
+		if id == 1 || CheckPermission(id, url){
 			c.Next()
 		}else{
 			utils.SuccessErr(c, 403, "您没有权限访问")

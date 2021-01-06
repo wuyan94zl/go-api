@@ -11,9 +11,9 @@ func SuccessData(c *gin.Context, data interface{}) {
 		"msg":  "请求成功",
 	})
 }
-func SuccessErr(c *gin.Context, err_code int, msg interface{}){
-	c.JSON(200, gin.H{
-		"code": err_code,
+func SuccessErr(c *gin.Context, errCode int, msg interface{}){
+	c.JSON(500, gin.H{
+		"code": errCode,
 		"msg":  msg,
 	})
 }

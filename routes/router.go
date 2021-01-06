@@ -9,6 +9,7 @@ import (
 // 注册当前
 func Register() *gin.Engine {
 	router := gin.Default() // 获取路由实例
+	router.Use(middleware.Cors())
 	// 定义默认普通api组
 	api := router.Group("/api")
 

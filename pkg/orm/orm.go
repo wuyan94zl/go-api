@@ -3,6 +3,7 @@ package orm
 import (
 	"fmt"
 	"github.com/wuyan94zl/api/pkg/database"
+	"github.com/wuyan94zl/api/pkg/logger"
 	"gorm.io/gorm"
 )
 
@@ -71,17 +72,17 @@ func (db *DB) Order(orderBy string) *DB {
 
 // 创建数据
 func (db *DB) Create(model interface{}) {
-	db.DB.Create(model)
+	logger.SystemError(db.DB.Create(model).Error)
 }
 
 // 保存更新数据
 func (db *DB) Save(model interface{}) {
-	db.DB.Save(model)
+	logger.SystemError(db.DB.Save(model).Error)
 }
 
 // 删除数据
 func (db *DB) Delete(model interface{}) {
-	db.DB.Delete(model)
+	logger.SystemError(db.DB.Delete(model).Error)
 }
 
 // 主键查询一条数据
@@ -101,7 +102,7 @@ func (db *DB) Get(model interface{}, relationship ...string) {
 
 // 查询分页数据
 func (db *DB) Paginate(lists *PageList, relationship ...string) {
-	if lists.PageSize == 0{
+	if lists.PageSize == 0 {
 		lists.PageSize = 15
 	}
 	var count int64

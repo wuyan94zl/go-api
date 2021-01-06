@@ -1,13 +1,11 @@
 package controller
 
 import (
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/wuyan94zl/api/pkg/orm"
 	"github.com/wuyan94zl/api/pkg/rbac/model"
 	"github.com/wuyan94zl/api/pkg/utils"
 	"strconv"
-	"time"
 )
 
 func RoleCreate(c *gin.Context) {
@@ -69,22 +67,9 @@ func RoleDelete(c *gin.Context) {
 	utils.SuccessData(c, "删除成功")
 }
 func RoleInfo(c *gin.Context) {
-	//id, _ := strconv.Atoi(c.Query("id"))
-	//var Role model.Role
-	//orm.GetInstance().First(&Role, id, "Menus", "Permissions")
-	//utils.SuccessData(c, Role)
+	id, _ := strconv.Atoi(c.Query("id"))
 	var Role model.Role
-	where := make(map[string]interface{})
-
-	where["name"] = "测试"
-	where["id"] = 3
-	where["created_at"] = orm.Where{Way: "between",Value: []time.Time{time.Now(),time.Now()}}
-
-	or := make(map[string]interface{})
-	or["id"] = orm.Where{Way: "IN",Value: []int64{2,4,5}}
-	or["name"] = orm.Where{Way: "like",Value: "测试%"}
-
-	orm.GetInstance().Where(where).Or(or).Get(&Role)
+	orm.GetInstance().First(&Role, id, "Menus", "Permissions")
 	utils.SuccessData(c, Role)
 }
 
@@ -105,7 +90,6 @@ func RolePaginate(c *gin.Context) {
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 	pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "3"))
 	paginate := orm.SetPageList(&Role, int64(page), int64(pageSize))
-	fmt.Println(paginate)
 	orm.GetInstance().Order("id desc").Paginate(paginate)
 	utils.SuccessData(c, paginate)
 }

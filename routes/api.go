@@ -10,4 +10,3 @@ import (
 func ApiRouter(router *gin.RouterGroup) {
 	utils.AddRoute(router, "POST", "/admin/login", admin.Login)
 }
-
