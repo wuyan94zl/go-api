@@ -99,7 +99,7 @@ func RoleSelectAll(c *gin.Context) {
 func GetPermissionMenu(c *gin.Context) {
 	roleId := c.Query("id")
 	role := model.Role{}
-	orm.GetInstance().First(&role, roleId, "Permissions","Menus")
+	orm.GetInstance().First(&role, roleId, "Permissions")
 	tree, has := role.GetPermissionMenu()
 	result := make(map[string]interface{})
 	result["tree"] = tree

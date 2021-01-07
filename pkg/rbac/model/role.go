@@ -42,9 +42,6 @@ func (role *Role) GetPermissionMenu() ([]treeType, []uint64) {
 	for _, v := range role.Permissions {
 		permission = append(permission, v.Id)
 	}
-	for _, v := range role.Menus {
-		permission = append(permission, v.Id+mId)
-	}
 
 	var Menu []Menu
 	orm.GetInstance().Order("parent_id").Get(&Menu, "Permissions")
@@ -80,11 +77,17 @@ func (role *Role) SetPermissionMenu(permissionId []string) {
 		addPermission = append(addPermission, RolePermission{RoleId: role.Id, PermissionId: v.Id})
 	}
 	var addMenu []RoleMenu
+	var menuIds []uint64
 	for _, v := range permissionId {
 		id, _ := strconv.Atoi(v)
 		if uint64(id) > mId {
-			addMenu = append(addMenu, RoleMenu{RoleId: role.Id, MenuId: uint64(id) - mId})
+			menuIds = append(menuIds, uint64(id)-mId)
 		}
+	}
+	menus := make(map[uint64]RoleMenu)
+	parentMenu(menuIds, menus, role.Id)
+	for _, v := range menus {
+		addMenu = append(addMenu, v)
 	}
 	orm.GetInstance().DB.Create(addPermission)
 	orm.GetInstance().DB.Create(addMenu)
@@ -123,4 +126,23 @@ func TreeList(data []treeType, pid uint64, level uint64) []treeType {
 		}
 	}
 	return listTree
+}
+
+func parentMenu(menuId []uint64, menuMap map[uint64]RoleMenu, roleId uint64) {
+	where := make(map[string]interface{})
+	where["id"] = orm.Where{Way: "IN", Value: menuId}
+	var menus []Menu
+	orm.GetInstance().Where(where).Get(&menus)
+	var nid []uint64
+	for _, v := range menus {
+		if v.ParentId > 0 {
+			if _, ok := menuMap[v.ParentId]; !ok {
+				nid = append(nid, v.ParentId)
+			}
+		}
+		menuMap[v.Id] = RoleMenu{RoleId: roleId, MenuId: v.Id}
+	}
+	if len(nid) > 0 {
+		parentMenu(nid, menuMap, roleId)
+	}
 }
