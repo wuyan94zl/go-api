@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/wuyan94zl/api/pkg/orm"
 	"github.com/wuyan94zl/api/pkg/rbac/model"
@@ -13,10 +12,8 @@ func PermissionCreate(c *gin.Context) {
 	// 验证参数
 	data := make(map[string][]string)
 
-	data["name"] = []string{"required"}
 	data["route"] = []string{"required"}
 	data["menu_id"] = []string{"required"}
-	data["description"] = []string{"required"}
 
 	validate := utils.Validator(c.Request, data)
 	if validate != nil {
@@ -24,11 +21,11 @@ func PermissionCreate(c *gin.Context) {
 		return
 	}
 	var Permission model.Permission
-	Permission.Name = c.PostForm("name")
+	Permission.Name = c.DefaultPostForm("name","")
 	Permission.Route = c.PostForm("route")
 	MenuId, _ := strconv.Atoi(c.PostForm("menu_id"))
 	Permission.MenuId = uint64(MenuId)
-	Permission.Description = c.PostForm("description")
+	Permission.Description = c.DefaultPostForm("description","")
 	orm.GetInstance().Create(&Permission)
 	utils.SuccessData(c, Permission) // 返回创建成功的信息
 }
@@ -36,10 +33,8 @@ func PermissionUpdate(c *gin.Context) {
 	// 验证参数
 	data := make(map[string][]string)
 
-	data["name"] = []string{"required"}
 	data["route"] = []string{"required"}
 	data["menu_id"] = []string{"required"}
-	data["description"] = []string{"required"}
 
 	validate := utils.Validator(c.Request, data)
 	if validate != nil {
@@ -54,11 +49,11 @@ func PermissionUpdate(c *gin.Context) {
 		return
 	}
 
-	Permission.Name = c.PostForm("name")
+	Permission.Name = c.DefaultPostForm("name","")
 	Permission.Route = c.PostForm("route")
 	MenuId, _ := strconv.Atoi(c.PostForm("menu_id"))
 	Permission.MenuId = uint64(MenuId)
-	Permission.Description = c.PostForm("description")
+	Permission.Description = c.DefaultPostForm("description","")
 	orm.GetInstance().Save(Permission)
 	utils.SuccessData(c, Permission) // 返回创建成功的信息
 }
@@ -77,6 +72,5 @@ func PermissionDelete(c *gin.Context) {
 
 func PermissionList(c *gin.Context) {
 	allRoutes := utils.AllRoutes
-	fmt.Println(allRoutes)
 	utils.SuccessData(c, allRoutes)
 }

@@ -13,13 +13,13 @@ import (
 var secretary = config.GetString("jwt.secretary")
 
 type User struct {
-	Id        uint64
-	Email     string    `gorm:"unique"validate:"required,min:6,email"search:"like"`
-	Password  string    `validate:"min:6"pwd:"pwd"`
-	Name      string    `validate:"required,min:6"search:"like"`
-	Roles     []Role    `gorm:"many2many:user_roles;joinForeignKey:UserID"relationship:"manyToMany"`
-	CreatedAt time.Time `gorm:"column:created_at;index"`
-	UpdatedAt time.Time `gorm:"column:updated_at"`
+	Id        uint64    `json:"id"gorm:"column:id;primaryKey;autoIncrement;not null"`
+	Email     string    `json:"email"gorm:"unique"validate:"required,min:6,email"search:"like"`
+	Password  string    `json:"password"validate:"min:6"pwd:"pwd"`
+	Name      string    `json:"name"validate:"required,min:6"search:"like"`
+	Roles     []Role    `json:"roles"gorm:"many2many:user_roles;joinForeignKey:UserID"relationship:"manyToMany"`
+	CreatedAt time.Time `json:"created_at"gorm:"column:created_at;index"`
+	UpdatedAt time.Time `json:"updated_at"gorm:"column:updated_at"`
 }
 
 type UserRole struct {
@@ -47,6 +47,32 @@ func (user *User) SetRole(roleId string) {
 		userHasRole = append(userHasRole, UserRole{UserId: user.Id, RoleId: uint64(uid)})
 	}
 	orm.GetInstance().DB.Create(userHasRole)
+}
+
+func (user *User) Menus() []Menu {
+	var Menus []Menu
+
+	var roleIds []uint64
+	for _, v := range user.Roles {
+		roleIds = append(roleIds, v.Id)
+	}
+	var roleMenus []RoleMenu
+	where := make(map[string]interface{})
+	where["role_id"] = orm.Where{Way: "IN", Value: roleIds}
+	orm.GetInstance().Where(where).Get(&roleMenus)
+
+	var menuIds []uint64
+	for _, v := range roleMenus {
+		menuIds = append(menuIds, v.MenuId)
+	}
+
+	mWhere := make(map[string]interface{})
+	mWhere["id"] = orm.Where{Way: "IN", Value: menuIds}
+	orm.GetInstance().Where(mWhere).Order("sort ASC").Get(&Menus)
+
+	tree := RecursionMenuList(Menus, 0, 1)
+
+	return tree
 }
 
 func (user *User) Token() (map[string]interface{}, error) {

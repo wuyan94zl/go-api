@@ -2,12 +2,12 @@ package orm
 
 // 分页返回数
 type PageList struct {
-	CurrentPage int64
-	FirstPage   int64
-	LastPage    int64
-	PageSize    int64
-	Total       int64
-	Data        interface{}
+	CurrentPage int64       `json:"current_page"`
+	FirstPage   int64       `json:"first_page"`
+	LastPage    int64       `json:"last_page"`
+	PageSize    int64       `json:"page_size"`
+	Total       int64       `json:"total"`
+	Data        interface{} `json:"data"`
 }
 
 func SetPageList(data interface{}, currentPage int64, pageSize ...int64) *PageList {

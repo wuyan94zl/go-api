@@ -12,8 +12,11 @@ func RegisterRouter(router *gin.RouterGroup) {
 	utils.AddRoute(router, "POST", "/role/update", controller.RoleUpdate)
 	utils.AddRoute(router, "GET", "/role/delete", controller.RoleDelete)
 	utils.AddRoute(router, "GET", "/role/info", controller.RoleInfo)
-	utils.AddRoute(router, "POST", "/role/paginate", controller.RolePaginate)
+	utils.AddRoute(router, "GET", "/role/paginate", controller.RolePaginate)
 	utils.AddRoute(router, "POST", "/role/menu/permission", controller.RolePermissionMenu)
+	utils.AddRoute(router, "GET", "/role/menu/permission", controller.GetPermissionMenu)
+
+
 
 	utils.AddRoute(router, "POST", "/permission/create", controller.PermissionCreate)
 	utils.AddRoute(router, "POST", "/permission/update", controller.PermissionUpdate)

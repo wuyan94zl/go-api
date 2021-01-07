@@ -48,3 +48,10 @@ func AuthInfo(c *gin.Context) {
 	u := c.MustGet("auth").(admin.Admin)
 	utils.SuccessData(c, u)
 }
+func Menus(c *gin.Context) {
+	id := c.MustGet("auth_id")
+	adminInfo := admin.Admin{}
+	orm.GetInstance().First(&adminInfo,id,"Roles")
+	tree := adminInfo.Menus()
+	utils.SuccessData(c, tree)
+}

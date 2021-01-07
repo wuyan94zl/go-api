@@ -6,5 +6,5 @@ import (
 
 type Admin struct {
 	model.User
-	Phone string `validate:"required,min:11,max:11"search:"="`
+	Phone string `validate:"required,min:11,max:11"search:"="json:"phone"`
 }

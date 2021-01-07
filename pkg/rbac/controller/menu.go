@@ -12,10 +12,9 @@ func MenuCreate(c *gin.Context) {
 	// 验证参数
 	data := make(map[string][]string)
 
-	data["parent_id"] = []string{"required", "numeric"}
+	data["parent_id"] = []string{"numeric"}
 	data["name"] = []string{"required"}
 	data["route"] = []string{"required"}
-	data["description"] = []string{"required"}
 
 	validate := utils.Validator(c.Request, data)
 	if validate != nil {
@@ -27,7 +26,9 @@ func MenuCreate(c *gin.Context) {
 	Menu.ParentId = uint64(ParentId)
 	Menu.Name = c.PostForm("name")
 	Menu.Route = c.PostForm("route")
-	Menu.Description = c.PostForm("description")
+	Menu.Icon = c.DefaultPostForm("icon","")
+	sort, _ := strconv.Atoi(c.PostForm("sort"))
+	Menu.Sort = uint64(sort)
 	orm.GetInstance().Create(&Menu)
 	utils.SuccessData(c, Menu) // 返回创建成功的信息
 }
@@ -35,10 +36,9 @@ func MenuUpdate(c *gin.Context) {
 	// 验证参数
 	data := make(map[string][]string)
 
-	data["parent_id"] = []string{"required", "numeric"}
+	data["parent_id"] = []string{"numeric"}
 	data["name"] = []string{"required"}
 	data["route"] = []string{"required"}
-	data["description"] = []string{"required"}
 
 	validate := utils.Validator(c.Request, data)
 	if validate != nil {
@@ -57,7 +57,9 @@ func MenuUpdate(c *gin.Context) {
 	Menu.ParentId = uint64(ParentId)
 	Menu.Name = c.PostForm("name")
 	Menu.Route = c.PostForm("route")
-	Menu.Description = c.PostForm("description")
+	Menu.Icon = c.DefaultPostForm("icon","")
+	sort, _ := strconv.Atoi(c.PostForm("sort"))
+	Menu.Sort = uint64(sort)
 	orm.GetInstance().Save(Menu)
 	utils.SuccessData(c, Menu) // 返回创建成功的信息
 }
@@ -76,7 +78,7 @@ func MenuDelete(c *gin.Context) {
 }
 func MenuList(c *gin.Context) {
 	var Menu []model.Menu
-	orm.GetInstance().Order("parent_id").Get(&Menu, "Permissions")
+	orm.GetInstance().Order("sort").Get(&Menu, "Permissions")
 	tree := model.RecursionMenuList(Menu, 0, 1)
 	utils.SuccessData(c, tree)
 }

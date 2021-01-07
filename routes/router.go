@@ -12,17 +12,17 @@ func Register() *gin.Engine {
 	router.Use(middleware.Cors())
 	// 定义默认普通api组
 	api := router.Group("/api")
+	ApiRouter(api)
 
 	// 定义默认auth认证api组
 	authApi := router.Group("api")
 	authApi.Use(middleware.ApiAuth())
+	AuthRouter(authApi)
 
 	// 定义默认auth认证api组
-	permissionApi := authApi
+	permissionApi := router.Group("api")
+	permissionApi.Use(middleware.ApiAuth())
 	permissionApi.Use(rbac.PermissionCheck())
-
-	ApiRouter(api)
-	AuthRouter(authApi)
 	rbac.RegisterRouter(permissionApi)
 
 	return router // 返回路由

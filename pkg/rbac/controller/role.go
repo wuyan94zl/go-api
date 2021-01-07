@@ -6,6 +6,7 @@ import (
 	"github.com/wuyan94zl/api/pkg/rbac/model"
 	"github.com/wuyan94zl/api/pkg/utils"
 	"strconv"
+	"strings"
 )
 
 func RoleCreate(c *gin.Context) {
@@ -41,7 +42,7 @@ func RoleUpdate(c *gin.Context) {
 	}
 	id, _ := strconv.Atoi(c.Query("id"))
 	var Role model.Role
-	orm.GetInstance().First(&Role,id)
+	orm.GetInstance().First(&Role, id)
 	if Role.Id == 0 {
 		utils.SuccessErr(c, -1000, "数据不存在")
 		return
@@ -56,14 +57,16 @@ func RoleDelete(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Query("id"))
 	var Role model.Role
 
-	orm.GetInstance().First(&Role,id)
+	orm.GetInstance().First(&Role, id)
 	if Role.Id == 0 {
 		utils.SuccessErr(c, -1000, "数据不存在")
 		return
 	}
 	orm.GetInstance().Delete(Role)
-	orm.GetInstance().Delete(Role.Menus)
-	orm.GetInstance().Delete(Role.Permissions)
+	where := make(map[string]interface{})
+	where["role_id"] = Role.Id
+	orm.GetInstance().Where(where).Delete(model.RoleMenu{})
+	orm.GetInstance().Where(where).Delete(model.RolePermission{})
 	utils.SuccessData(c, "删除成功")
 }
 func RoleInfo(c *gin.Context) {
@@ -73,18 +76,6 @@ func RoleInfo(c *gin.Context) {
 	utils.SuccessData(c, Role)
 }
 
-func RolePermissionMenu(c *gin.Context) {
-	permissionId := c.DefaultPostForm("permission_id", "")
-	roleId := c.Query("id")
-	role := model.Role{}
-	orm.GetInstance().First(&role,roleId)
-	role.DelPermissionMenu()
-	if permissionId != "" {
-		role.SetPermissionMenu(permissionId)
-	}
-	utils.SuccessData(c, "设置成功")
-}
-
 func RolePaginate(c *gin.Context) {
 	var Role []model.Role
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
@@ -92,4 +83,28 @@ func RolePaginate(c *gin.Context) {
 	paginate := orm.SetPageList(&Role, int64(page), int64(pageSize))
 	orm.GetInstance().Order("id desc").Paginate(paginate)
 	utils.SuccessData(c, paginate)
+}
+
+// 获取
+func GetPermissionMenu(c *gin.Context) {
+	roleId := c.Query("id")
+	role := model.Role{}
+	orm.GetInstance().First(&role, roleId, "Permissions")
+	tree, has := role.GetPermissionMenu()
+	result := make(map[string]interface{})
+	result["tree"] = tree
+	result["has"] = has
+	utils.SuccessData(c, result)
+}
+
+// 设置
+func RolePermissionMenu(c *gin.Context) {
+	permissionStr := c.PostForm("permission_id")
+	permissionId := strings.Split(permissionStr,",")
+	roleId := c.Query("id")
+	role := model.Role{}
+	orm.GetInstance().First(&role, roleId)
+	role.DelPermissionMenu()
+	role.SetPermissionMenu(permissionId)
+	utils.SuccessData(c, "设置成功")
 }
