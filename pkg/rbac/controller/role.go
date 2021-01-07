@@ -85,11 +85,21 @@ func RolePaginate(c *gin.Context) {
 	utils.SuccessData(c, paginate)
 }
 
+func RoleSelectAll(c *gin.Context) {
+	var Role []model.Role
+	orm.GetInstance().Get(&Role)
+	result := make(map[int]map[string]string)
+	for k, v := range Role {
+		result[k] = map[string]string{"id": strconv.Itoa(int(v.Id)), "name": v.Name}
+	}
+	utils.SuccessData(c, result)
+}
+
 // 获取
 func GetPermissionMenu(c *gin.Context) {
 	roleId := c.Query("id")
 	role := model.Role{}
-	orm.GetInstance().First(&role, roleId, "Permissions")
+	orm.GetInstance().First(&role, roleId, "Permissions","Menus")
 	tree, has := role.GetPermissionMenu()
 	result := make(map[string]interface{})
 	result["tree"] = tree
@@ -100,7 +110,7 @@ func GetPermissionMenu(c *gin.Context) {
 // 设置
 func RolePermissionMenu(c *gin.Context) {
 	permissionStr := c.PostForm("permission_id")
-	permissionId := strings.Split(permissionStr,",")
+	permissionId := strings.Split(permissionStr, ",")
 	roleId := c.Query("id")
 	role := model.Role{}
 	orm.GetInstance().First(&role, roleId)

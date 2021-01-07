@@ -24,6 +24,7 @@ func Register() *gin.Engine {
 	permissionApi.Use(middleware.ApiAuth())
 	permissionApi.Use(rbac.PermissionCheck())
 	rbac.RegisterRouter(permissionApi)
+	PermissionRouter(permissionApi)
 
 	return router // 返回路由
 }

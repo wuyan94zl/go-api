@@ -15,7 +15,7 @@ var secretary = config.GetString("jwt.secretary")
 type User struct {
 	Id        uint64    `json:"id"gorm:"column:id;primaryKey;autoIncrement;not null"`
 	Email     string    `json:"email"gorm:"unique"validate:"required,min:6,email"search:"like"`
-	Password  string    `json:"password"validate:"min:6"pwd:"pwd"`
+	Password  string    `json:"-"validate:"min:6"pwd:"pwd"`
 	Name      string    `json:"name"validate:"required,min:6"search:"like"`
 	Roles     []Role    `json:"roles"gorm:"many2many:user_roles;joinForeignKey:UserID"relationship:"manyToMany"`
 	CreatedAt time.Time `json:"created_at"gorm:"column:created_at;index"`

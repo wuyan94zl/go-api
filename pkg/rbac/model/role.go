@@ -3,6 +3,7 @@ package model
 import (
 	"fmt"
 	"github.com/wuyan94zl/api/pkg/orm"
+	"strconv"
 	"time"
 )
 
@@ -26,25 +27,35 @@ type RoleMenu struct {
 	MenuId uint64
 }
 type treeType struct {
-	Id    uint64     `json:"id"`
-	Name  string     `json:"name"`
-	Route string     `json:"route"`
-	Child []treeType `json:"child"`
+	Id       uint64     `json:"id"`
+	ParentId uint64     `json:"parent_id"`
+	Name     string     `json:"name"`
+	Route    string     `json:"route"`
+	Child    []treeType `json:"child"`
 }
+
+var mId uint64 = 100000000
 
 // 获取角色权限菜单
 func (role *Role) GetPermissionMenu() ([]treeType, []uint64) {
-	permission :=  make([]uint64,0)
+	permission := make([]uint64, 0)
 	for _, v := range role.Permissions {
 		permission = append(permission, v.Id)
 	}
+	for _, v := range role.Menus {
+		permission = append(permission, v.Id+mId)
+	}
+
 	var Menu []Menu
 	orm.GetInstance().Order("parent_id").Get(&Menu, "Permissions")
 
 	var tree []treeType
-	var mId uint64 = 10000000
 	for _, v := range Menu {
-		item := treeType{Id: mId, Name: v.Name, Route: ""}
+		var pId uint64 = 0
+		if v.ParentId > 0 {
+			pId = mId + v.ParentId
+		}
+		item := treeType{Id: mId + v.Id, ParentId: pId, Name: v.Name, Route: ""}
 		var child []treeType
 		for _, p := range v.Permissions {
 			childItem := treeType{Id: p.Id, Name: fmt.Sprintf("%s（%s）", p.Name, p.Route), Route: p.Route}
@@ -53,9 +64,9 @@ func (role *Role) GetPermissionMenu() ([]treeType, []uint64) {
 		item.Child = child
 
 		tree = append(tree, item)
-		mId++
 	}
-	return tree, permission
+	treeData := TreeList(tree, 0, 1)
+	return treeData, permission
 }
 
 // 设置角色权限菜单
@@ -64,16 +75,15 @@ func (role *Role) SetPermissionMenu(permissionId []string) {
 	where["id"] = orm.Where{Way: "IN", Value: permissionId}
 	var permissions []Permission
 	orm.GetInstance().Where(where).Get(&permissions)
-	mapV := make(map[uint64]uint64)
 	var addPermission []RolePermission
-	var addMenu []RoleMenu
-
 	for _, v := range permissions {
 		addPermission = append(addPermission, RolePermission{RoleId: role.Id, PermissionId: v.Id})
-		_, ok := mapV[v.MenuId]
-		if !ok {
-			mapV[v.MenuId] = v.MenuId
-			addMenu = append(addMenu, RoleMenu{RoleId: role.Id, MenuId: v.MenuId})
+	}
+	var addMenu []RoleMenu
+	for _, v := range permissionId {
+		id, _ := strconv.Atoi(v)
+		if uint64(id) > mId {
+			addMenu = append(addMenu, RoleMenu{RoleId: role.Id, MenuId: uint64(id) - mId})
 		}
 	}
 	orm.GetInstance().DB.Create(addPermission)
@@ -88,11 +98,27 @@ func (role *Role) DelPermissionMenu() {
 	orm.GetInstance().Where(where).DB.Delete(RoleMenu{})
 }
 
+// 菜单列表tree
 func RecursionMenuList(data []Menu, pid uint64, level uint64) []Menu {
 	var listTree []Menu
 	for _, value := range data {
 		if value.ParentId == pid {
 			value.Menus = RecursionMenuList(data, value.Id, level+1)
+			listTree = append(listTree, value)
+		}
+	}
+	return listTree
+}
+
+// 菜单权限tree
+func TreeList(data []treeType, pid uint64, level uint64) []treeType {
+	var listTree []treeType
+	for _, value := range data {
+		if value.ParentId == pid {
+			child := TreeList(data, value.Id, level+1)
+			if len(child) > 0 {
+				value.Child = child
+			}
 			listTree = append(listTree, value)
 		}
 	}
