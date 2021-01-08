@@ -1,14 +1,17 @@
 ## golang的rbac权限api管理服务
 
-第一步： git clone https://github.com/wuyan94zl/GoApiServer
-第二步： go run wuyan.go admin 和 go run wuyan.go admin route permission
-第三步： go run main.go
+第一步： git clone https://github.com/wuyan94zl/GoApiServer  
 
-查看演示 [http://gorbacui.wuyan94zl.cn](http://gorbacui.wuyan94zl.cn)
+第二步： go run wuyan.go admin 和 go run wuyan.go admin route permission  
+
+第三步： go run main.go  
+
+查看演示 [http://gorbacui.wuyan94zl.cn](http://gorbacui.wuyan94zl.cn)  
+
 以上操作就是演示地址中的 api 所有功能
 
 ## 构建CURD工具使用
-需求：增加文章管理功能
+> 需求：增加文章管理功能
 1、创建数据表模型
 ```go
 type Article struct {
