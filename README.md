@@ -40,11 +40,11 @@ MigrateStruct["article"] = Article{}
 ```
 3、执行 `go run wuyan.go article`  和 `go run wuyan.go article route permission`  
 
-> 以上操作后会增加文章的增、删、改、详细、分页数据5个接口
-增和改接口中字段验证为：
-title：必填，长度在10到50之间
-description：必填，长度在10到200之间
-content：必填
-admin_id：必填，必须是数字
-详细和分页数据中：
-数据会关联查询admin信息
+> 以上操作后会增加文章的增、删、改、详细、分页数据5个接口  
+增和改接口中字段验证为：  
+title：必填，长度在10到50之间  
+description：必填，长度在10到200之间  
+content：必填  
+admin_id：必填，必须是数字  
+详细和分页数据中：  
+数据会关联查询admin信息  
