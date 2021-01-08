@@ -51,7 +51,7 @@ func Paginate(c *gin.Context) {
 	data = "	page, _ := strconv.Atoi(c.DefaultQuery(\"page\", \"1\"))"
 	str = fmt.Sprintf("%s%s\n", str, data)
 	relationshipStr := getRelationshipStr()
-	str = fmt.Sprintf("\t%s%s\n", str, "	lists := orm.SetPageList(&Admin, int64(page))")
+	str = fmt.Sprintf("\t%s%sorm.SetPageList(&%s, int64(page))\n", str, "	lists := ", kind.Name())
 	str = fmt.Sprintf("%s\torm.GetInstance().Where(where).Paginate(lists%s)\n", str, relationshipStr)
 
 	str = fmt.Sprintf("%s\tutils.SuccessData(c, lists)\n}", str)
