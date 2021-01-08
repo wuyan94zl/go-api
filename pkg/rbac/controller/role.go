@@ -79,8 +79,7 @@ func RoleInfo(c *gin.Context) {
 func RolePaginate(c *gin.Context) {
 	var Role []model.Role
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
-	pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "3"))
-	paginate := orm.SetPageList(&Role, int64(page), int64(pageSize))
+	paginate := orm.SetPageList(&Role, int64(page))
 	orm.GetInstance().Order("id desc").Paginate(paginate)
 	utils.SuccessData(c, paginate)
 }

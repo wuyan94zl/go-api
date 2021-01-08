@@ -10,4 +10,3 @@ import (
 func PermissionRouter(router *gin.RouterGroup) {
 	utils.AddRoute(router, "POST", "/admin/role", admin.SetRole)
 }
-
