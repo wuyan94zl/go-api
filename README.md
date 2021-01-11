@@ -2,9 +2,11 @@
 
 第一步： git clone https://github.com/wuyan94zl/GoApiServer  
 
-第二步： go run wuyan.go admin 和 go run wuyan.go admin route permission  
+第二部： cp .env.example .env 并 修改 .env 对应的配置信息
 
-第三步： go run main.go  
+第三步： go run wuyan.go admin 和 go run wuyan.go admin route permission  
+
+第四步： go run main.go  
 
 查看演示 [http://gorbacui.wuyan94zl.cn](http://gorbacui.wuyan94zl.cn)  
 
