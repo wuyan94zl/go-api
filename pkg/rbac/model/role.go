@@ -3,6 +3,7 @@ package model
 import (
 	"fmt"
 	"github.com/wuyan94zl/api/pkg/orm"
+	"strconv"
 	"time"
 )
 
@@ -77,7 +78,12 @@ func (role *Role) SetPermissionMenu(permissionId []string) {
 		addPermission = append(addPermission, RolePermission{RoleId: role.Id, PermissionId: v.Id})
 		menuIds = append(menuIds, v.MenuId)
 	}
-
+	for _, v := range permissionId {
+		gid, _ := strconv.Atoi(v)
+		if uint64(gid) > mId {
+			menuIds = append(menuIds, uint64(gid)-mId)
+		}
+	}
 	menus := make(map[uint64]RoleMenu)
 	parentMenu(menuIds, menus, role.Id)
 
