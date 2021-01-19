@@ -3,7 +3,6 @@ package bootstrap
 import (
 	"github.com/wuyan94zl/api/app/models/admin"
 	"github.com/wuyan94zl/api/pkg/database"
-	"github.com/wuyan94zl/api/pkg/rbac/model"
 )
 
 var MigrateStruct map[string]interface{}
@@ -12,9 +11,6 @@ var MigrateStruct map[string]interface{}
 func init() {
 	MigrateStruct = make(map[string]interface{})
 	MigrateStruct["admin"] = admin.Admin{}
-	MigrateStruct["role"] = model.Role{}
-	MigrateStruct["permission"] = model.Permission{}
-	MigrateStruct["menu"] = model.Menu{}
 }
 
 func autoMigrate() {

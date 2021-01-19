@@ -4,11 +4,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/wuyan94zl/api/app/models/admin"
 	"github.com/wuyan94zl/api/pkg/orm"
-	"github.com/wuyan94zl/api/pkg/rbac/model"
 	"github.com/wuyan94zl/api/pkg/utils"
 	"golang.org/x/crypto/bcrypt"
-	"strconv"
-	"strings"
 )
 
 // 登录
@@ -50,32 +47,4 @@ func Login(c *gin.Context) {
 func AuthInfo(c *gin.Context) {
 	u := c.MustGet("auth").(admin.Admin)
 	utils.SuccessData(c, u)
-}
-
-// 设置角色
-func SetRole(c *gin.Context) {
-	userId, _ := strconv.Atoi(c.Query("id"))
-	roleIds := c.PostForm("role_id")
-	ids := strings.Split(roleIds, ",")
-	where := make(map[string]interface{})
-	where["user_id"] = userId
-	orm.GetInstance().Where(where).Delete(model.UserRole{})
-	var userRoles []model.UserRole
-	for _, id := range ids {
-		if id != ""{
-			uid, _ := strconv.Atoi(id)
-			userRoles = append(userRoles, model.UserRole{UserId: uint64(userId), RoleId: uint64(uid)})
-		}
-	}
-	orm.GetInstance().Create(userRoles)
-	utils.SuccessData(c, "ok")
-}
-
-// 用户菜单
-func Menus(c *gin.Context) {
-	id := c.MustGet("auth_id")
-	adminInfo := admin.Admin{}
-	orm.GetInstance().First(&adminInfo, id, "Roles")
-	tree := adminInfo.Menus()
-	utils.SuccessData(c, tree)
 }
