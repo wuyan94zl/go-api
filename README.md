@@ -8,6 +8,8 @@
 
 第四步： go run main.go  
 
+第五步：执行数据库数据初始化sql文件（见项目根目录）
+
 查看演示 [http://gorbacui.wuyan94zl.cn](http://gorbacui.wuyan94zl.cn)  
 
 以上操作就是演示地址中的 api 所有功能
