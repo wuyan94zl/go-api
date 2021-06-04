@@ -1,0 +1,24 @@
+app:
+  port: 8080
+mysql:
+  host: 127.0.0.1
+  port: 3306
+  username: root
+  password: 123456
+  database: blog
+  charset: utf8mb4
+  max_connect: 100
+  max_idle_connect: 20
+  max_life_seconds: 300
+redis:
+  host: 127.0.0.1
+  port: 6379
+  password: 123456
+  max_active: 200
+  max_idle: 50
+  idle_timeout: 300
+jwt:
+  secretary: asdaasdasd
+  export: 7200
+
+

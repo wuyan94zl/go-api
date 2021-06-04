@@ -1,0 +1,59 @@
+{
+  "package_name": "article",
+  "struct_name": "Article",
+  "fields": [
+    {
+      "field": "Id",
+      "type_name": "uint64",
+      "tags": {
+        "json": "id"
+      }
+    },
+    {
+      "field": "Username",
+      "type_name": "string",
+      "tags": {
+        "json": "username",
+        "validate": "required"
+      }
+    },
+    {
+      "field": "Password",
+      "type_name": "string",
+      "tags": {
+        "json": "password",
+        "validate": "required||min:6"
+      }
+    },
+    {
+      "field": "Nickname",
+      "type_name": "string",
+      "tags": {
+        "json": "nickname",
+        "validate": "required"
+      }
+    },
+    {
+      "field": "Email",
+      "type_name": "string",
+      "tags": {
+        "json": "email",
+        "validate": "required||email"
+      }
+    },
+    {
+      "field": "CreatedAt",
+      "type_name": "time.Time",
+      "tags": {
+        "json": "created_at"
+      }
+    },
+    {
+      "field": "UpdatedAt",
+      "type_name": "time.Time",
+      "tags": {
+        "json": "updated_at"
+      }
+    }
+  ]
+}
