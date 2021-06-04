@@ -3,10 +3,10 @@ package queue
 import (
 	"encoding/json"
 	"github.com/robfig/cron/v3"
+	"github.com/wuyan94zl/go-api/app/queue/utils"
 	redis "github.com/wuyan94zl/redigo"
 	"strconv"
 	"sync"
-	"github.com/wuyan94zl/go-api/app/queue/utils"
 )
 
 const MyQueueKey = "wuyan94zl:queue:list"

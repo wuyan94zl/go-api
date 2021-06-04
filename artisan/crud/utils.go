@@ -14,7 +14,7 @@ func getDir(name string) string {
 	if err != nil {
 		return ""
 	}
-	return filepath.Join(filepath.Dir(baseDir), "app", "http", name)
+	return filepath.Join(baseDir, "app", "http", name)
 }
 
 func jsonData(structData *jsonStruct, name string) error {

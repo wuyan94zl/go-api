@@ -2,8 +2,8 @@ package main
 
 import (
 	"fmt"
-	"os"
 	"github.com/wuyan94zl/go-api/artisan/cli"
+	"os"
 )
 
 func main() {

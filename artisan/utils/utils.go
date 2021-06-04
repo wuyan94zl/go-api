@@ -63,5 +63,5 @@ func GetDir(method string, name string) string {
 	if err != nil {
 		return ""
 	}
-	return filepath.Join(filepath.Dir(baseDir), "app", method, name)
+	return filepath.Join(baseDir, "app", method, name)
 }
