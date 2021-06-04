@@ -1,54 +1,179 @@
-## golang的rbac权限api管理服务
+## 基于gin，gorm集成的 golang api 服务
 
-第一步： git clone https://github.com/wuyan94zl/GoApiServer  
+## 使用
+git clone https://github.com/wuyan94zl/go-api  
+修改 config.yml 对应的配置信息  
+go run main.go
 
-第二部： cp .env.example .env 并 修改 .env 对应的配置信息
+### 目录结构简单说明
+```
+|-app           app目录
+|--command      定时任务代码
+|--http         api功能代码
+|--middleware   中间件代码
+|--queue        延时队列代码
+|-artisan       （不需要更改）
+|-bootstrap     (不需要更改)
+|-config        （不需要更改）
+|-pkg           工具包
+|-routes        （不需要更改）
+```
+> 所有开发基本都在app目录（功能代码开发） 或者pkg（工具包开发）
+> 开发需要对gin,gorm熟悉
 
-第三步： go run wuyan.go admin 和 go run wuyan.go admin route permission  
 
-第四步： go run main.go  
+## 代码生成器 artisan 包含以下类
 
-第五步：执行数据库数据初始化sql文件（见项目根目录）
+### 安装
+`go get -u github.com/wuyan94zl/go-api/artisan`
 
-查看演示 [http://gorbacui.wuyan94zl.cn](http://gorbacui.wuyan94zl.cn)  
+### model 结构体 代码生成器
+命令: `artisan model name`  
+该命令会创建 app/http/name 文件夹，并生成app/http/name/model.json 文件，内容如下
 
-以上操作就是演示地址中的 api 所有功能
+```json
+{
+  "package_name": "article",
+  "struct_name": "Article",
+  "fields": [
+    {
+      "field": "Id",
+      "type_name": "uint64",
+      "tags": {
+        "json": "id"
+      }
+    },
+    {
+      "field": "CreatedAt",
+      "type_name": "time.Time",
+      "tags": {
+        "json": "created_at"
+      }
+    },
+    {
+      "field": "UpdatedAt",
+      "type_name": "time.Time",
+      "tags": {
+        "json": "updated_at"
+      }
+    }
+  ]
+}
+```
 
-## 构建CURD工具使用
-> 需求：增加文章管理功能
-1、创建数据表模型
+package_name：对应命令行中 name 值不做更改  
+struct_name：对应模型中的结构体  
+fields：对应模型字段
+
+- field:字段名称对应结构体的字段
+- type_name：字段类型
+- tags：字段标签 对应结构体中的 json 标签
+
+> validate 标签api字段验证规则 如 validate:"required||min:6||email"  
+> 表示该字段必填长度不能小于6 必须字email类型，这个验证会自动生成
+
+如上默认生成的结构体为
+
 ```go
 type Article struct {
-	Id          uint64 `gorm:"column:id;primaryKey;autoIncrement;not null"json:"id"`
-	Title       string `validate:"required,min:10,max:50"search:"like"json:"title"`
-	Description string `validate:"required,min:10,max:200"json:"description"`
-	Content     string `validate:"required"json:"content"`
-	View        uint64
-	AdminId     uint64      `validate:"required,numeric"json:"admin_id"`
-	Admin       admin.Admin `gorm:"-"relationship:"belongTo"json:"admin"`
-	CreatedAt   time.Time   `gorm:"column:created_at;index"json:"created_at"`
-	UpdatedAt   time.Time   `gorm:"column:updated_at"json:"updated_at"`
+    Id        uint64    `json:"id"`
+    CreatedAt time.Time `json:"created_at"`
+    UpdatedAt time.Time `json:"updated_at"`
 }
-//valiedate标签控制create和update的参数验证，valiedate参数详情请看 github.com/thedevsaddam/govalidator
-//如上创建的时候title和description必填且长度在10-50和10-200
-//admin_id 必填且为数字
-
-//search标签控制分页列表的查询方式（目前支持:like,=,>,<,!=。like为str%）
-//如上分页列表接口接收title关键字like查询
-
-//relationship 为关联，如上查询的时候会关联出admin用户信息
-```  
-2、bootstrap/auto_migrate.go `init` 函数中`MigrateStruct` map数据添加模型  
-```go
-MigrateStruct["article"] = Article{}
 ```
-3、执行 `go run wuyan.go article`  和 `go run wuyan.go article route permission`  
 
-> 以上操作后会增加文章的增、删、改、详细、分页数据5个接口  
-增和改接口中字段验证为：  
-title：必填，长度在10到50之间  
-description：必填，长度在10到200之间  
-content：必填  
-admin_id：必填，必须是数字  
-详细和分页数据中：  
-数据会关联查询admin信息  
+根据需要修改json文件定义模型
+
+### model 结构体 crud api 代码生成器
+命令 `artisan api name`
+> 该命令需要先执行 artisan model name 生成 model.json 文件才能处理
+
+执行后会在app/http/name文件生成三个go文件：  
+controller.go 控制器代码文件  
+model.go 模型代码文件  
+service.go 服务代码文件  
+
+**路由注册**  
+在app/http/kernel.go 文件 Handle 函数中增加 Init()
+```go
+import "github.com/wuyan94zl/go-api/app/http/name" // 增加代码
+    func Handle() {
+    name.Init() // 增加代码
+}
+```
+
+### console 定时任务 代码生成器
+命令：`article console name`  
+执行后会创建 app/command/name 文件夹,并生成 `handle.go` 文件 内容如下：
+
+```go
+package name
+
+import (
+	"fmt"
+	"time"
+)
+
+type Job struct{}
+
+func (j Job) Run() {
+	fmt.Println("Execution per minute", time.Now().Format("2006-01-02 15:4:05"))
+}
+
+```
+
+根据业务需求在`Run`函数中写入任务代码  
+完成后再 app/command/kernel.go 文件 Handle 函数中增加任务调度
+```go
+import "github.com/wuyan94zl/go-api/app/command/name" // 增加代码
+func Handle(c *cron.Cron) {
+	//秒 分 时 天 月 年
+	c.AddJob("0 * * * * *", name.Job{}) //增加代码
+}
+
+```
+### queue 延时队列 代码生成器
+命令：`artisan queue data`  
+执行后会生成 app/queue/data 文件夹 并生成 app/queue/name/queue.go 文件 内容如下：
+```go
+package data
+
+import (
+	"fmt"
+	"time"
+	"github.com/wuyan94zl/go-api/app/queue/utils"
+)
+
+var queueType = "data"
+
+func NewQueue(data map[string]string) *Queue {
+	return &Queue{
+		Data: data,
+	}
+}
+
+type Queue struct {
+	Data map[string]string
+}
+
+func (q *Queue) Push(second ...int64) {
+	utils.Push(queueType, q.Data, second...)
+}
+func (q *Queue) Run() {
+	fmt.Println("执行队列程序 参数为：", q.Data)
+	time.Sleep(1 * time.Second)
+}
+
+
+```
+在Run函数中写业务代码  
+添加队列 params == 上面Run函数中的d.Data (map[string]string 类型)
+```go
+params := make(map[string]string)
+params["data"] = "queue data params"
+// 立即执行队列
+data.NewQueue(params).Push()
+// 延时10秒后执行队列
+data.NewQueue(params).Push(10)
+```
+
