@@ -2,6 +2,7 @@ package queue
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/robfig/cron/v3"
 	"github.com/wuyan94zl/go-api/app/queue/utils"
 	redis "github.com/wuyan94zl/redigo"
@@ -32,7 +33,11 @@ func (j *Job) Run() {
 		}
 		queue := Action(queueData.QueueType, queueData.QueueData)
 		queue.Run()
-		redis.ZRemByScore(utils.MyQueueKey, jobData[0].Score, jobData[0].Score)
+		_, err = redis.ZRemByScore(utils.MyQueueKey, jobData[0].Score, jobData[0].Score)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
 	}
 	mutexRun.Unlock()
 }

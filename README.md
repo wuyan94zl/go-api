@@ -29,6 +29,8 @@
 ### 安装
 `go get -u github.com/wuyan94zl/go-api/artisan`
 
+执行 `artisan -h` 确保 artisan 代码生成器安装成功
+
 ### model 表结构体 代码生成器
 命令: `artisan model name`  
 该命令会创建 app/http/name 文件夹，并生成app/http/name/model.json 文件，内容如下  
@@ -103,7 +105,7 @@ import "github.com/wuyan94zl/go-api/app/http/name" // 增加代码
 生成的代码是根据 `model.json` 的配置生成，根据需求修改生成的 3 个 go 文件  
 
 ### console 定时任务 代码生成器
-**命令**：`article console name`  
+**命令**：`article cron name`  
 执行后会创建 app/command/name 文件夹,并生成 `handle.go` 文件 内容如下：
 
 ```go
