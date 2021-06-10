@@ -12,5 +12,6 @@ require (
 	github.com/thedevsaddam/govalidator v1.9.10
 	github.com/wuyan94zl/mysql v0.0.0-20210319093519-bc4f0912e357
 	github.com/wuyan94zl/redigo v1.0.3
+	golang.org/x/crypto v0.0.0-20200622213623-75b288015ac9
 	gorm.io/driver/mysql v1.1.0 // indirect
 )

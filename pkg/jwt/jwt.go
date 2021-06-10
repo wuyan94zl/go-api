@@ -11,7 +11,7 @@ import (
 )
 
 type Jwt struct {
-	Id uint64 `json:"id"gorm:"column:id;primaryKey;autoIncrement;not null"`
+	Id uint64 `json:"id" gorm:"column:id;primaryKey;autoIncrement;not null"`
 }
 
 // CustomClaims 定义授权保存信息

@@ -7,6 +7,7 @@ import (
 
 var Route = gin.Default()
 var RouteGroup *gin.RouterGroup
+var AuthRouteGroup *gin.RouterGroup
 
 type Item struct {
 	Method string
@@ -17,6 +18,7 @@ type Item struct {
 func init() {
 	Route.Use(middleware.Cors())
 	RouteGroup = Route.Group("api")
+	AuthRouteGroup = Group("api",middleware.ApiAuth())
 }
 
 func Group(relativePath string, middleware ...gin.HandlerFunc) *gin.RouterGroup {

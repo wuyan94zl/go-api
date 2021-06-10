@@ -1,5 +1,7 @@
 package http
 
+import "github.com/wuyan94zl/go-api/pkg/auth"
+
 func Handle() {
-	//article.Init()
+	auth.Init()
 }
