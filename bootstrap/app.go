@@ -26,10 +26,14 @@ func Start() *gin.Engine {
 }
 
 func Timer() {
-	c := cron.New(cron.WithSeconds())
-	command.Handle(c)
-	queue.Handle(c)
-	c.Start()
+	if viper.GetString("name") == "main"{
+		c := cron.New(cron.WithSeconds())
+		command.Handle(c)
+		queue.Handle(c)
+		c.Start()
+		fmt.Println("[Timer-debug] Start cron on server")
+		fmt.Println("[Timer-debug] Start queue on server")
+	}
 	select {}
 }
 
