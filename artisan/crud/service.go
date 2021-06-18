@@ -30,7 +30,19 @@ func Init(route ...*gin.RouterGroup) {
 	routes.Register(routeItems, route...)
 }
 
-func PaginateData(c *gin.Context) *mysql.PageList {
+var ins *Service
+
+type Service struct{}
+
+// GetService 单例
+func GetService() *Service {
+	if ins == nil {
+		ins = &Service{}
+	}
+	return ins
+}
+
+func (s *Service) PaginateData(c *gin.Context) *mysql.PageList {
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 	pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "10"))
 	data := &[]{{.modelName}}{}

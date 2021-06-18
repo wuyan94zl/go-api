@@ -20,7 +20,7 @@ type {{.StructName}} struct {
 }
 
 func (st *{{.StructName}}) Lists(c *gin.Context) *mysql.PageList {
-	data := PaginateData(c)
+	data := GetService().PaginateData(c)
 	mysql.GetInstance(){{.AuthWhere}}.Order("id desc").Paginate(data)
 	return data
 }

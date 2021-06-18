@@ -71,7 +71,7 @@ func getVal(jsonFiled string, typeName string) string {
 	case "time.Time":
 		val = fmt.Sprintf("utils.StrToTime(c.DefaultPostForm(\"%s\",\"\"))", jsonFiled)
 	default:
-		val = fmt.Sprintf("utils.StrTo%s%s(c.DefaultPostForm(\"%s\",\"\"))", strings.ToUpper(string(typeName[0])), typeName[0:], jsonFiled)
+		val = fmt.Sprintf("utils.StrTo%s%s(c.DefaultPostForm(\"%s\",\"\"))", strings.ToUpper(string(typeName[0])), typeName[1:], jsonFiled)
 	}
 	return val
 }

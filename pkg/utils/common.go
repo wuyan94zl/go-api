@@ -35,3 +35,8 @@ func StrToInt32(s string) int32  {
 	n, _ := strconv.Atoi(s)
 	return int32(n)
 }
+
+func StrToInt(s string) int  {
+	n, _ := strconv.Atoi(s)
+	return n
+}
