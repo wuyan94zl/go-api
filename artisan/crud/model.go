@@ -9,6 +9,7 @@ var modelTpl = `package {{.package}}
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/wuyan94zl/go-api/pkg/utils"
 	"github.com/wuyan94zl/mysql"
 	"strconv"
 	"time"
@@ -20,7 +21,7 @@ type {{.StructName}} struct {
 
 func (st *{{.StructName}}) Lists(c *gin.Context) *mysql.PageList {
 	data := PaginateData(c)
-	mysql.GetInstance().Order("id desc").Paginate(data)
+	mysql.GetInstance(){{.AuthWhere}}.Order("id desc").Paginate(data)
 	return data
 }
 
@@ -44,7 +45,7 @@ func (st *{{.StructName}}) Update(c *gin.Context) (bool, interface{}) {
 
 func (st *{{.StructName}}) Info(c *gin.Context) (bool, interface{}) {
 	id, _ := strconv.Atoi(c.Query("id"))
-	err := mysql.GetInstance().First(st, id)
+	err := mysql.GetInstance(){{.AuthWhere}}.First(st, id)
 	if err != nil {
 		return false, err.Error()
 	}
@@ -63,7 +64,7 @@ func (st *{{.StructName}}) Delete(c *gin.Context) (bool, interface{}) {
 `
 
 func setModel(structData *jsonStruct) error {
-	StructFields, ValidateData := structData.getStructFields()
+	StructFields, ValidateData,AuthWhere := structData.getStructFields()
 	err := utils.GenFile(utils.FileGenConfig{
 		Dir:          getDir(structData.PackageName),
 		Filename:     "model.go",
@@ -73,6 +74,7 @@ func setModel(structData *jsonStruct) error {
 			"StructName":   structData.StructName,
 			"StructFields": StructFields,
 			"ValidateData": ValidateData,
+			"AuthWhere":    AuthWhere,
 		},
 	})
 	if err != nil {
