@@ -31,13 +31,17 @@
 
 执行 `artisan -h` 确保 artisan 代码生成器安装成功
 
-### model 表结构体 代码生成器
-命令: `artisan model name`  
-该命令会创建 app/http/name 文件夹，并生成app/http/name/model.json 文件，内容如下  
+## 构建 restful api
+第一步：生成`restful api`的`json`配置文件，再跟进需要配置字段信息  
+第二步：根据`json`配置文件生成`restful api`代码
+
+### 生成`restful api`的`json`配置文件
+命令：`artisan model task`
+会创建 `app/http/task/model.api`文件
 ```json
 {
-  "package_name": "article",
-  "struct_name": "Article",
+  "package_name": "task",
+  "struct_name": "Task",
   "fields": [
     {
       "field": "Id",
@@ -46,6 +50,7 @@
         "json": "id"
       }
     },
+	// 增加自定义字段 然后删除该行
     {
       "field": "CreatedAt",
       "type_name": "time.Time",
@@ -63,53 +68,89 @@
   ]
 }
 ```
+增加以下字段信息
+```json
+    {
+      "field": "UserId",
+      "type_name": "uint64",
+      "tags": {
+        "json": "user_id",
+        "auth": "auth"
+      }
+    },
+    {
+      "field": "Name",
+      "type_name": "string",
+      "tags": {
+        "json": "name",
+        "validate": "required"
+      }
+    },
+    {
+      "field": "Description",
+      "type_name": "string",
+      "tags": {
+        "json": "description",
+        "validate": "required"
+      }
+    },
+    {
+      "field": "Duration",
+      "type_name": "int",
+      "tags": {
+        "json": "duration",
+        "validate": "required||numeric"
+      }
+    },
+    {
+      "field": "StartTime",
+      "type_name": "time.Time",
+      "tags": {
+        "json": "start_time",
+        "validate": "required||date"
+      }
+    },
+    {
+      "field": "EndTime",
+      "type_name": "time.Time",
+      "tags": {
+        "json": "end_time",
+        "validate": "required||date"
+      }
+    },
+```
 
-package_name：对应命令行中 name 值不做更改  
-struct_name：对应模型中的结构体  
-fields：对应模型字段
+### 根据`json`配置文件生成`restful api`代码
+命令：`artisan api task`
+执行后会在`app/http/task`文件夹生成三个go文件：
+- controller.go 控制器代码文件
+- model.go 模型代码文件
+- service.go 服务代码文件
 
-- field:字段名称对应结构体的字段
-- type_name：字段类型
-- tags：字段标签 对应结构体中的 json 标签
-
-> validate 标签api字段验证规则 如 validate:"required||min:6||email"  
-> 表示该字段必填长度不能小于6 必须字email类型，这个验证会自动生成
-
-如上默认生成的结构体为  
+路由注册：
+在`app/http/kernel.go` 文件 `Handle` 函数中增加 `Init()`
 ```go
-type Article struct {
-    Id        uint64    `json:"id"`
-    CreatedAt time.Time `json:"created_at"`
-    UpdatedAt time.Time `json:"updated_at"`
+import (
+	"github.com/wuyan94zl/go-api/app/http/task" // 增加代码
+	"github.com/wuyan94zl/go-api/routes" // 增加代码
+)
+func Handle() {
+	task.Init(routes.AuthRouteGroup) // 增加代码 因为需要 auth 权限 所以传参 routes.AuthRouteGroup
 }
 ```
-根据需要修改json文件定义模型
 
-### model 结构体 crud api 代码生成器
-**命令** `artisan api name`
-> 该命令需要先执行 artisan model name 生成 model.json 文件才能处理
+运行程序
+命令：`go run main.go`
 
-执行后会在app/http/name文件生成三个go文件：  
-- controller.go 控制器代码文件  
-- model.go 模型代码文件  
-- service.go 服务代码文件  
+![go-api artisan](https://cdn.learnku.com/uploads/images/202106/18/29943/hGh6BM602j.png!large)
+好了，用postman 试试上面的5个api接口
 
-**路由注册**  
-在app/http/kernel.go 文件 Handle 函数中增加 Init()
+## 构建定时任务
+
+**命令**：`article cron task`
+执行后会创建 `app/command/task` 文件夹,并生成 `handle.go` 文件 内容如下：
 ```go
-import "github.com/wuyan94zl/go-api/app/http/name" // 增加代码
-    func Handle() {
-    name.Init() // 增加代码
-}
-```
-生成的代码是根据 `model.json` 的配置生成，根据需求修改生成的 3 个 go 文件  
-
-### console 定时任务 代码生成器
-**命令**：`article cron name`  
-执行后会创建 app/command/name 文件夹,并生成 `handle.go` 文件 内容如下：
-
-```go
-package name
+package task
 
 import (
 	"fmt"
@@ -125,30 +166,30 @@ func (j Job) Run() {
 ```
 
 根据业务需求在`Run`函数中写入任务代码  
-完成后再 app/command/kernel.go 文件 Handle 函数中增加任务调度
+完成后在 app/command/kernel.go 文件 Handle 函数中增加任务调度
 ```go
-import "github.com/wuyan94zl/go-api/app/command/name" // 增加代码
+import "github.com/wuyan94zl/go-api/app/command/task" // 增加代码
 func Handle(c *cron.Cron) {
 	//秒 分 时 天 月 年
-	c.AddJob("0 * * * * *", name.Job{}) //增加代码
+	c.AddJob("0 * * * * *", task.Job{}) //增加代码
 }
 
 ```
-以上Handle 配置好后 控制台会每分钟执行一次 `handle.go` 中的 `Run` 函数  
+以上Handle 配置好后 控制台会每分钟执行一次 `handle.go` 中的 `Run` 函数
 
-### queue 延时队列 代码生成器
-**命令**：`artisan queue data`  
+## 构建延时队列
+**命令**：`artisan queue job`
 执行后会生成 app/queue/data 文件夹 并生成 app/queue/name/queue.go 文件 内容如下：
 ```go
-package data
+package job
 
 import (
 	"fmt"
-	"time"
 	"github.com/wuyan94zl/go-api/app/queue/utils"
+	"time"
 )
 
-var queueType = "data"
+var queueType = "job"
 
 func NewQueue(data map[string]string) *Queue {
 	return &Queue{
@@ -167,17 +208,37 @@ func (q *Queue) Run() {
 	fmt.Println("执行队列程序 参数为：", q.Data)
 	time.Sleep(1 * time.Second)
 }
+```
+在Run函数中写业务代码
+> `q.Data` 数据为发送队列是传递的参数
+map[string]string 类型，下面代码中的 params数据
 
+**队列注册** app/queue/actions.go
+```go
+package queue
+
+import "github.com/wuyan94zl/go-api/app/queue/job" // 手动代码
+
+func Action(method string, mapData map[string]string) Queue {
+	switch method {
+	case "job":// 手动代码
+		return job.NewQueue(mapData)// 手动代码
+	default:
+		return nil
+	}
+}
 
 ```
-在Run函数中写业务代码  
-添加队列 params == 上面Run函数中的d.Data (map[string]string 类型)
+
+**发送队列**  
+在上面生成的定时任务`Run`函数中增加
 ```go
 params := make(map[string]string)
 params["data"] = "queue data params"
 // 立即执行队列
-data.NewQueue(params).Push()
+job.NewQueue(params).Push()
 // 延时10秒后执行队列
-data.NewQueue(params).Push(10)
-```
-执行以上代码后，控制台会立即处理第一个队列，然后10秒后再执行第二个队列  
+job.NewQueue(params).Push(10)
+``` 
+> 控制台会在定时任务执行后马上执行第一个队列，10秒后执行第二个队列
+
