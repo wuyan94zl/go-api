@@ -16,9 +16,9 @@ type Item struct {
 }
 
 func init() {
-	Route.Use(middleware.Cors())
+	Route.Use(middleware.Exception, middleware.Cors())
 	RouteGroup = Route.Group("api")
-	AuthRouteGroup = Group("api",middleware.ApiAuth())
+	AuthRouteGroup = Group("api", middleware.ApiAuth())
 }
 
 func Group(relativePath string, middleware ...gin.HandlerFunc) *gin.RouterGroup {

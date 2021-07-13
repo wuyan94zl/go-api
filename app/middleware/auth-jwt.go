@@ -3,7 +3,7 @@ package middleware
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/wuyan94zl/go-api/pkg/jwt"
-	"github.com/wuyan94zl/go-api/pkg/utils"
+	"github.com/wuyan94zl/go-api/pkg/response"
 )
 
 func ApiAuth() gin.HandlerFunc {
@@ -12,9 +12,8 @@ func ApiAuth() gin.HandlerFunc {
 		jwtData := jwt.Jwt{}
 		id, err := jwtData.AuthToken(tokenString)
 		if err != nil {
-			utils.SuccessErr(c, 401, err)
+			response.Error(401, err)
 			c.Abort()
-			return
 		}
 		// 保存用户到 上下文
 		c.Set("auth_id", id)

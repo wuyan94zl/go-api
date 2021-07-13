@@ -2,6 +2,7 @@ package auth
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/wuyan94zl/go-api/pkg/response"
 	"github.com/wuyan94zl/go-api/routes"
 	"github.com/wuyan94zl/mysql"
 )
@@ -34,7 +35,10 @@ func GetAuthInfo(c *gin.Context) User {
 	if !err {
 		user := User{}
 		mysql.GetInstance().First(&user, c.MustGet("auth_id"))
-		c.Set("auth_info",user)
+		if user.Id == 0 {
+			response.Error(500, "用户不存在")
+		}
+		c.Set("auth_info", user)
 		return user
 	} else {
 		return info.(User)
