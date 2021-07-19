@@ -2,9 +2,9 @@ package queue
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/robfig/cron/v3"
 	"github.com/wuyan94zl/go-api/app/queue/utils"
+	"github.com/wuyan94zl/go-api/pkg/logger"
 	redis "github.com/wuyan94zl/redigo"
 	"strconv"
 	"sync"
@@ -26,17 +26,20 @@ func (j *Job) Run() {
 	mutexRun.Lock()
 	jobData := j.pop()
 	if len(jobData) > 0 {
-		var queueData BaseQueue
-		err := json.Unmarshal([]byte(jobData[0].Member), &queueData)
-		if err != nil {
-			return
-		}
-		queue := Action(queueData.QueueType, queueData.QueueData)
-		queue.Run()
-		_, err = redis.ZRemByScore(utils.MyQueueKey, jobData[0].Score, jobData[0].Score)
-		if err != nil {
-			fmt.Println(err)
-			return
+		for _, v := range jobData {
+			var queueData BaseQueue
+			err := json.Unmarshal([]byte(v.Member), &queueData)
+			if err != nil {
+				logger.Error("queue json Unmarshal Err:", err)
+				continue
+			}
+			queue := Action(queueData.QueueType, queueData.QueueData)
+			queue.Run()
+			_, err = redis.ZRemByScore(utils.MyQueueKey, v.Score, v.Score)
+			if err != nil {
+				logger.Error("queue ZRemByScore Err:", err)
+				continue
+			}
 		}
 	}
 	mutexRun.Unlock()

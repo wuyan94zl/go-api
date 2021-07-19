@@ -3,6 +3,7 @@ package middleware
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/wuyan94zl/go-api/pkg/logger"
 	"github.com/wuyan94zl/go-api/pkg/response"
 )
 
@@ -17,6 +18,7 @@ func Exception(c *gin.Context) {
 					successErr(c, data.Code, data.Message)
 				}
 			default:
+				logger.Error(r)
 				successErr(c, 500, fmt.Sprintf("%s%v", "系统错误：", r))
 			}
 			c.Abort()

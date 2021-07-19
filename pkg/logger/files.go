@@ -10,23 +10,27 @@ import (
 var file *fileLog
 
 type fileLog struct {
-	file *os.File
+	log *log.Logger
 }
 
 func (f *fileLog) info(logs ...interface{}) {
-	log.New(f.file, "", 0).Println(logPrefix(infoLog, logs...))
+	f.log.SetPrefix(f.log.Prefix() + "info ")
+	f.log.Println(logs...)
 }
 
 func (f *fileLog) error(logs ...interface{}) {
-	log.New(f.file, "", 0).Println(logPrefix(errorLog, logs...))
+	f.log.SetPrefix(f.log.Prefix() + "error ")
+	f.log.Println(logs...)
 }
 
 func (f *fileLog) warning(logs ...interface{}) {
-	log.New(f.file, "", 0).Println(logPrefix(warningLog, logs...))
+	f.log.SetPrefix(f.log.Prefix() + "warning ")
+	f.log.Println(logs...)
 }
 
 func (f *fileLog) notice(logs ...interface{}) {
-	log.New(f.file, "", 0).Println(logPrefix(noticeLog, logs...))
+	f.log.SetPrefix(f.log.Prefix() + "notice ")
+	f.log.Println(logs...)
 }
 
 func getFileLog() *fileLog {
@@ -55,5 +59,5 @@ func logFile(dir string) *fileLog {
 	} else {
 		f, _ = os.OpenFile(filePath, os.O_APPEND|os.O_RDWR, 0777)
 	}
-	return &fileLog{file: f}
+	return &fileLog{log: log.New(f, "[api-debug] ", 3)}
 }
