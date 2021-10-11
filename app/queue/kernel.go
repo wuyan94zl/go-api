@@ -8,14 +8,11 @@ import (
 )
 
 type BaseQueue struct {
-	QueueType string            `json:"queue_type"`
-	QueueUnix int64             `json:"queue_unix"`
-	QueueData map[string]string `json:"queue_data"`
+	Time int64
 }
 
-// Run job 执行
-func (b BaseQueue) Run() {
-
+func (b BaseQueue) RunTime() int64 {
+	return b.Time
 }
 
 type Job struct {
@@ -29,10 +26,12 @@ var mutexRun sync.Mutex
 func (j *Job) Run() {
 	mutexRun.Lock()
 	j.llCopy.Init()
-	for i := j.ll.Len(); i > 0; i-- {
+	for true {
 		ele := j.ll.Back()
+		if ele == nil {
+			break
+		}
 		queue := ele.Value.(Queue)
-		// 当前队列 的处理时间对比
 		if queue.RunTime() <= time.Now().Unix() { // 处理队列
 			queue.Run()
 		} else { // 延时处理
@@ -53,7 +52,7 @@ func Handle(c *cron.Cron) {
 }
 
 type Queue interface {
-	Push(second ...int64)
+	Push(second int64)
 	Run()
 	RunTime() int64
 }

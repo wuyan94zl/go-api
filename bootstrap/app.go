@@ -8,7 +8,6 @@ import (
 	"github.com/wuyan94zl/go-api/app/command"
 	"github.com/wuyan94zl/go-api/app/http"
 	"github.com/wuyan94zl/go-api/app/queue"
-	"github.com/wuyan94zl/go-api/app/queue/test"
 	"github.com/wuyan94zl/go-api/config"
 	"github.com/wuyan94zl/go-api/routes"
 	"github.com/wuyan94zl/mysql"
@@ -27,18 +26,14 @@ func Start() *gin.Engine {
 }
 
 func Timer() {
+	c := cron.New(cron.WithSeconds())
 	if viper.GetString("name") == "main"{
-		c := cron.New(cron.WithSeconds())
 		command.Handle(c)
-		queue.Handle(c)
-		c.Start()
 		fmt.Println("[Timer-debug] Start cron on server")
-		fmt.Println("[Timer-debug] Start queue on server")
-		test.NewQueue(make(map[string]string)).Push(10)
-		test.NewQueue(make(map[string]string)).Push(2)
-		test.NewQueue(make(map[string]string)).Push(1)
-		test.NewQueue(make(map[string]string{"dd"""})).Push()
 	}
+	queue.Handle(c)
+	fmt.Println("[Timer-debug] Start queue on server")
+	c.Start()
 	select {}
 }
 
