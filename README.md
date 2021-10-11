@@ -179,66 +179,54 @@ func Handle(c *cron.Cron) {
 
 ## 构建延时队列
 **命令**：`artisan queue job`
-执行后会生成 app/queue/data 文件夹 并生成 app/queue/name/queue.go 文件 内容如下：
+执行后会生成 app/queue/job 文件夹 并生成 app/queue/job/queue.go 文件 内容如下：
 ```go
 package job
 
 import (
-	"fmt"
-	"github.com/wuyan94zl/go-api/app/queue/utils"
-	"time"
+"fmt"
+"github.com/wuyan94zl/go-api/app/queue"
+"time"
 )
 
-var queueType = "job"
-
-func NewQueue(data map[string]string) *Queue {
-	return &Queue{
-		Data: data,
-	}
+func NewQueue() Queue {
+	return Queue{}
 }
 
 type Queue struct {
-	Data map[string]string
+	Time int64
 }
 
-func (q *Queue) Push(second ...int64) {
-	utils.Push(queueType, q.Data, second...)
+func (q Queue) RunTime() int64 {
+	return q.Time
 }
-func (q *Queue) Run() {
-	fmt.Println("执行队列程序 参数为：", q.Data)
+
+func (q Queue) Push(second ...int64) {
+	if len(second) > 0 {
+		q.Time = time.Now().Unix() + second[0]
+	} else {
+		q.Time = time.Now().Unix()
+	}
+	queue.JobIns.Push(q)
+}
+
+func (q Queue) Run() {
+	fmt.Println("执行队列程序：job")
 	time.Sleep(1 * time.Second)
 }
+
 ```
 在Run函数中写业务代码
-> `q.Data` 数据为发送队列是传递的参数
-map[string]string 类型，下面代码中的 params数据
+> Run 函数中自定义参数：可以扩展Queue结构体后，更新NewQueue(interface...)
 
-**队列注册** app/queue/actions.go
+**发送队列**
 ```go
-package queue
-
-import "github.com/wuyan94zl/go-api/app/queue/job" // 手动代码
-
-func Action(method string, mapData map[string]string) Queue {
-	switch method {
-	case "job":// 手动代码
-		return job.NewQueue(mapData)// 手动代码
-	default:
-		return nil
-	}
-}
-
-```
-
-**发送队列**  
-在上面生成的定时任务`Run`函数中增加
-```go
-params := make(map[string]string)
-params["data"] = "queue data params"
+// 导入包
+import "github.com/wuyan94zl/go-api/app/queue/job"
 // 立即执行队列
-job.NewQueue(params).Push()
+job.NewQueue().Push()
 // 延时10秒后执行队列
-job.NewQueue(params).Push(10)
+job.NewQueue().Push(10)
 ``` 
 > 控制台会在定时任务执行后马上执行第一个队列，10秒后执行第二个队列
 

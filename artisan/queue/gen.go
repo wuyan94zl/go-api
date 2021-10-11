@@ -9,27 +9,33 @@ var tpl = `package {{.package}}
 
 import (
 	"fmt"
+	"github.com/wuyan94zl/go-api/app/queue"
 	"time"
-	"github.com/wuyan94zl/go-api/app/queue/utils"
 )
 
-var queueType = "{{.package}}"
-
-func NewQueue(data map[string]string) *Queue {
-	return &Queue{
-		Data: data,
-	}
+func NewQueue() Queue {
+	return Queue{}
 }
 
 type Queue struct {
-	Data map[string]string
+	Time int64
 }
 
-func (q *Queue) Push(second ...int64) {
-	utils.Push(queueType, q.Data, second...)
+func (q Queue) RunTime() int64 {
+	return q.Time
 }
-func (q *Queue) Run() {
-	fmt.Println("执行队列程序 参数为：", q.Data)
+
+func (q Queue) Push(second ...int64) {
+	if len(second) > 0 {
+		q.Time = time.Now().Unix() + second[0]
+	} else {
+		q.Time = time.Now().Unix()
+	}
+	queue.JobIns.Push(q)
+}
+
+func (q Queue) Run() {
+	fmt.Println("执行队列程序：{{.package}}")
 	time.Sleep(1 * time.Second)
 }
 
