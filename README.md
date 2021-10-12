@@ -184,34 +184,26 @@ func Handle(c *cron.Cron) {
 package job
 
 import (
-"fmt"
-"github.com/wuyan94zl/go-api/app/queue"
-"time"
+	"fmt"
+	"github.com/wuyan94zl/go-api/app/queue"
+	"time"
 )
+
+type Queue struct {
+	queue.BaseQueue
+}
 
 func NewQueue() Queue {
 	return Queue{}
 }
 
-type Queue struct {
-	Time int64
-}
-
-func (q Queue) RunTime() int64 {
-	return q.Time
-}
-
-func (q Queue) Push(second ...int64) {
-	if len(second) > 0 {
-		q.Time = time.Now().Unix() + second[0]
-	} else {
-		q.Time = time.Now().Unix()
-	}
+func (q Queue) Push(second int64) {
+	q.Time = time.Now().Unix() + second
 	queue.JobIns.Push(q)
 }
 
 func (q Queue) Run() {
-	fmt.Println("执行队列程序：job")
+	fmt.Println("执行队列程序：job", q.Time)
 	time.Sleep(1 * time.Second)
 }
 
@@ -224,7 +216,7 @@ func (q Queue) Run() {
 // 导入包
 import "github.com/wuyan94zl/go-api/app/queue/job"
 // 立即执行队列
-job.NewQueue().Push()
+job.NewQueue().Push(0)
 // 延时10秒后执行队列
 job.NewQueue().Push(10)
 ``` 

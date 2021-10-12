@@ -15,6 +15,9 @@ func Register(c *gin.Context) {
 	if ok, msg := validate.MapValidate(c.Request, validateMap, validateNameMap); !ok {
 		response.Error(401, msg)
 	}
+	if c.PostForm("password") != c.PostForm("password_confirmation"){
+		response.Error(401, "两次密码输入不一致")
+	}
 	where := make(map[string]interface{})
 	where["email"] = c.PostForm("email")
 	mysql.GetInstance().Where(where).One(&model)

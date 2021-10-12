@@ -10,35 +10,12 @@ import (
 var file *fileLog
 
 type fileLog struct {
-	log *log.Logger
-}
-
-func (f *fileLog) info(logs ...interface{}) {
-	f.log.SetPrefix(f.log.Prefix() + "info ")
-	f.log.Println(logs...)
-}
-
-func (f *fileLog) error(logs ...interface{}) {
-	f.log.SetPrefix(f.log.Prefix() + "error ")
-	f.log.Println(logs...)
-}
-
-func (f *fileLog) warning(logs ...interface{}) {
-	f.log.SetPrefix(f.log.Prefix() + "warning ")
-	f.log.Println(logs...)
-}
-
-func (f *fileLog) notice(logs ...interface{}) {
-	f.log.SetPrefix(f.log.Prefix() + "notice ")
-	f.log.Println(logs...)
+	path string
+	loggerBase
 }
 
 func getFileLog() *fileLog {
-	if file != nil {
-		return file
-	} else {
-		return logFile(fullDir())
-	}
+	return logFile(fullDir())
 }
 
 func fullDir() string {
@@ -52,6 +29,9 @@ func fullDir() string {
 
 func logFile(dir string) *fileLog {
 	filePath := filepath.Join(dir, time.Now().Format("20060102")+".log")
+	if file != nil && file.path == filePath {
+		return file
+	}
 	_, err := os.Stat(filePath)
 	var f *os.File
 	if err != nil {
@@ -59,5 +39,7 @@ func logFile(dir string) *fileLog {
 	} else {
 		f, _ = os.OpenFile(filePath, os.O_APPEND|os.O_RDWR, 0777)
 	}
-	return &fileLog{log: log.New(f, "[api-debug] ", 3)}
+	file = &fileLog{path: filePath}
+	file.log = log.New(f, "", 3)
+	return file
 }
