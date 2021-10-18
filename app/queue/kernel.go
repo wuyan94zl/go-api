@@ -16,15 +16,19 @@ func (b BaseQueue) RunTime() int64 {
 }
 
 type Job struct {
-	ll     *list.List
-	llCopy *list.List
+	running bool
+	lock    sync.Mutex
+	ll      *list.List
+	llCopy  *list.List
 }
 
-var JobIns = &Job{ll: list.New(), llCopy: list.New()}
-var mutexRun sync.Mutex
+var JobIns = &Job{running: false, ll: list.New(), llCopy: list.New()}
 
 func (j *Job) Run() {
-	mutexRun.Lock()
+	if !j.start() {
+		return
+	}
+	defer j.end()
 	j.llCopy.Init()
 	for true {
 		ele := j.ll.Back()
@@ -40,11 +44,24 @@ func (j *Job) Run() {
 		j.ll.Remove(ele)
 	}
 	j.ll, j.llCopy = j.llCopy, j.ll
-	mutexRun.Unlock()
 }
 
 func (j *Job) Push(queue Queue) {
 	j.ll.PushFront(queue)
+}
+
+func (j *Job) start() bool {
+	j.lock.Lock()
+	defer j.lock.Unlock()
+	if j.running == false {
+		j.running = true
+		return true
+	}
+	return false
+}
+
+func (j *Job) end() {
+	j.running = false
 }
 
 func Handle(c *cron.Cron) {
