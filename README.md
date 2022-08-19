@@ -1,4 +1,4 @@
-## [新版工具集 gotools](https://https://github.com/wuyan94zl/gotools)
+## [新版工具集 gotools](https://github.com/wuyan94zl/gotools)
 
 ## 基于gin，gorm集成的 golang api 服务
 作为一个后端 api 服务除了离不开的 crud 操作，还经常用到 定时任务，延时队列。  
